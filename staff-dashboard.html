@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Staff Dashboard - Institution Management System by Team H2O">
+    <title>Staff Dashboard | IMS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="staff-dashboard-container">
+        <!-- Header -->
+        <div id="header">
+            <div>
+                <h1>👨‍🏫 Staff Dashboard</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Welcome back, <span id="staff-name-header">Staff Member</span></p>
+            </div>
+            <button onclick="logout()">Logout</button>
+        </div>
+        
+        <!-- Messages -->
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none;"></div>
+        <div id="success-message" style="display:none;"></div>
+        
+        <!-- Staff Profile Section -->
+        <div id="staff-profile-section" class="card">
+            <h2>Your Profile</h2>
+            
+            <div id="staff-profile-details">
+                <p><strong>Name:</strong> <span id="staff-name">-</span></p>
+                <p><strong>Mobile Number:</strong> <span id="staff-mobile">-</span></p>
+                <p><strong>Login ID:</strong> <span id="staff-login-id">-</span></p>
+                <p><strong>Designation:</strong> <span id="staff-designation">-</span></p>
+                <p><strong>Access Level:</strong> <span id="staff-access-level">-</span></p>
+                <p><strong>Account Status:</strong> <span id="staff-status">-</span></p>
+                <p><strong>Last Login:</strong> <span id="staff-last-login">-</span></p>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Access Information Section -->
+        <div id="access-section">
+            <h2>Your Access & Permissions</h2>
+            
+            <div id="access-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                <!-- Assigned Classes Card -->
+                <div class="card">
+                    <h3>📚 Assigned Classes</h3>
+                    <div id="assigned-classes-list">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+                
+                <!-- Teaching Subjects Card (for teachers) -->
+                <div class="card" id="teaching-subjects-card" style="display:none;">
+                    <h3>📖 Teaching Subjects</h3>
+                    <div id="teaching-subjects-list">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+                
+                <!-- Permissions Card -->
+                <div class="card">
+                    <h3>🔐 Permissions</h3>
+                    <div id="permissions-list">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Quick Actions Section -->
+        <div id="quick-actions-section">
+            <h2>Quick Actions</h2>
+            
+            <div id="action-buttons">
+                <!-- Attendance Button (for teachers) -->
+                <button class="action-card" id="attendance-btn" onclick="goToAttendance()" style="display:none;">
+                    <h3>📝 Take Attendance</h3>
+                    <p>Mark student attendance for your classes</p>
+                    <small>Available for your assigned subjects</small>
+                </button>
+                
+                <!-- View Students Button -->
+                <button class="action-card" onclick="viewStudents()">
+                    <h3>👥 View Students</h3>
+                    <p>See students in your assigned classes</p>
+                    <small>Access student information</small>
+                </button>
+                
+                <!-- View Class Schedule Button (if coordinator/admin) -->
+                <button class="action-card" id="schedule-btn" onclick="viewSchedule()" style="display:none;">
+                    <h3>📅 Class Schedule</h3>
+                    <p>View and manage class schedules</p>
+                    <small>Coordinator/Admin access</small>
+                </button>
+                
+                <!-- View All Staff Button (if admin) -->
+                <button class="action-card" id="view-staff-btn" onclick="viewAllStaff()" style="display:none;">
+                    <h3>👔 View Staff</h3>
+                    <p>Access staff directory and information</p>
+                    <small>Admin access only</small>
+                </button>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Institution Information -->
+        <div id="institution-info-section" class="card">
+            <h2>Institution Information</h2>
+            <div id="institution-details">
+                <p><strong>Institution Name:</strong> <span id="inst-name">-</span></p>
+                <p><strong>Institution Type:</strong> <span id="inst-type">-</span></p>
+                <p><strong>Institution Code:</strong> <span id="inst-code">-</span></p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="powered-by" style="margin-top: 3rem;">
+            <p>Powered by <strong>Team H2O</strong></p>
+            <p style="font-size: 0.75rem; opacity: 0.8;">Institution Management System</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/config.js"></script>
+
+    <script src="js/staff-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Part 2 - Mapping</title>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"></head>
+
+
+</head>
+<body>
+    <div id="part2-container">
+        <div id="header">
+            <h1>PART 2: Mapping of Information</h1>
+            <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none; color:red;"></div>
+        <div id="success-message" style="display:none; color:green;"></div>
+        
+        <!-- Section Navigation -->
+        <div id="section-tabs">
+            <button onclick="showMappingSection('staff-class')" id="tab-staff-class">1. Assign Staff to Classes</button>
+            <button onclick="showMappingSection('class-subject')" id="tab-class-subject">2. Assign Subjects to Classes</button>
+            <button onclick="showMappingSection('teacher-subject')" id="tab-teacher-subject">3. Assign Teachers to Subjects</button>
+        </div>
+        
+        <hr>
+        
+        <!-- 1. ASSIGN STAFF TO CLASSES -->
+        <div id="section-staff-class" class="mapping-section" style="display:none;">
+            <h2>Assign Designation & Classes to Staff</h2>
+            <p><em>(Except Class Teacher - assign designation and which classes they can access)</em></p>
+            
+            <h3>Assign Staff Member</h3>
+            <form id="assign-staff-class-form">
+                <div>
+                    <label for="sc-staff-name">Name: *</label>
+                    <select id="sc-staff-name" required></select>
+                </div>
+                
+                <div>
+                    <label for="sc-designation">Designation: *</label>
+                    <select id="sc-designation" required></select>
+                </div>
+                
+                <div>
+                    <label>Assigned Classes:</label>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="sc-all-classes" onchange="toggleAllClasses(this)">
+                            All Classes
+                        </label>
+                    </div>
+                    <div id="sc-classes-checkboxes"></div>
+                    <p><em>More than one choice should be possible</em></p>
+                </div>
+                
+                <button type="submit">Assign Staff to Classes</button>
+            </form>
+            
+            <h3>Current Assignments</h3>
+            <table id="staff-class-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Designation</th>
+                        <th>Assigned Classes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 2. ASSIGN SUBJECTS TO CLASSES -->
+        <div id="section-class-subject" class="mapping-section" style="display:none;">
+            <h2>Assign Subjects to Classes</h2>
+            <p><em>(Choose class, then select which subjects are taught in that class)</em></p>
+            
+            <h3>Assign Subjects to a Class</h3>
+            <form id="assign-class-subject-form">
+                <div>
+                    <label for="cs-class">Choose Class: *</label>
+                    <select id="cs-class" required></select>
+                    <p><em>Nick name of class should appear here automatically if created earlier</em></p>
+                </div>
+                
+                <div>
+                    <label>Choose Subjects:</label>
+                    <div>
+                        <label>
+                            <input type="checkbox" id="cs-all-subjects" onchange="toggleAllSubjects(this)">
+                            All Subjects
+                        </label>
+                    </div>
+                    <div id="cs-subjects-checkboxes"></div>
+                    <p><em>More than one choice should be possible. Option of ALL should be possible.</em></p>
+                </div>
+                
+                <button type="submit">Assign Subjects to Class</button>
+            </form>
+            
+            <h3>Current Subject Assignments</h3>
+            <table id="class-subject-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Assigned Subjects</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 3. ASSIGN TEACHERS TO SUBJECTS -->
+        <div id="section-teacher-subject" class="mapping-section" style="display:none;">
+            <h2>Assign Subject Teachers to Subjects</h2>
+            <p><em>(Choose teacher, then class, then select which subjects they teach)</em></p>
+            
+            <h3>Assign Teacher to Subjects</h3>
+            <form id="assign-teacher-subject-form">
+                <div>
+                    <label for="ts-teacher">Name of Teacher: *</label>
+                    <select id="ts-teacher" required></select>
+                </div>
+                
+                <div>
+                    <label for="ts-class">Class: *</label>
+                    <select id="ts-class" required></select>
+                    <p><em>As soon as class is selected, subjects assigned to that class should appear below</em></p>
+                </div>
+                
+                <div id="ts-subjects-container" style="display:none;">
+                    <label>Subjects (tick the ones this teacher teaches):</label>
+                    <div id="ts-subjects-checkboxes"></div>
+                    <p><em>Tick more than one box should be possible</em></p>
+                </div>
+                
+                <button type="submit">Assign Teacher to Subjects</button>
+            </form>
+            
+            <h3>Current Teacher Assignments</h3>
+            <table id="teacher-subject-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Teacher Name</th>
+                        <th>Class</th>
+                        <th>Assigned Subjects</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/mapping.js"></script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Part 1 - Basic Information</title>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"></head>
+
+
+</head>
+<body>
+    <div id="part1-container">
+        <div id="header">
+            <h1>PART 1: Basic Information Management</h1>
+            <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none; color:red;"></div>
+        <div id="success-message" style="display:none; color:green;"></div>
+        
+        <!-- Section Navigation -->
+        <div id="section-tabs">
+            <button onclick="showSection('designations')" id="tab-designations">1. Designations</button>
+            <button onclick="showSection('classes')" id="tab-classes">2. Classes</button>
+            <button onclick="showSection('staff')" id="tab-staff">3. Staff</button>
+            <button onclick="showSection('subjects')" id="tab-subjects">4. Subjects</button>
+            <button onclick="showSection('students')" id="tab-students">5. Students</button>
+            <button onclick="showSection('hierarchy')" id="tab-hierarchy">6. Hierarchy</button>
+        </div>
+        
+        <hr>
+        
+        <!-- 1. DESIGNATIONS SECTION -->
+        <div id="section-designations" class="section" style="display:none;">
+            <h2>Designations Management</h2>
+            <p><em>(Principal, Vice Principal, Director, Teacher, Coordinator, etc.)</em></p>
+            
+            <h3>Add New Designation</h3>
+            <form id="add-designation-form">
+                <label for="des-name">Designation Name: *</label>
+                <input type="text" id="des-name" required>
+                
+                <label for="des-level">Level: (Optional, 1-10)</label>
+                <input type="number" id="des-level" min="1" max="10">
+                
+                <button type="submit">Add Designation</button>
+            </form>
+            
+            <h3>Existing Designations</h3>
+            <table id="designations-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Staff Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 2. CLASSES SECTION -->
+        <div id="section-classes" class="section" style="display:none;">
+            <h2>Classes Management</h2>
+            
+            <h3>Add New Class</h3>
+            <form id="add-class-form">
+                <label for="class-name">Class Name: *</label>
+                <input type="text" id="class-name" required>
+                
+                <label for="class-nickname">Nick Name: (Optional)</label>
+                <input type="text" id="class-nickname">
+                
+                <button type="submit">Add Class</button>
+            </form>
+            
+            <h3>Existing Classes</h3>
+            <table id="classes-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Class Name</th>
+                        <th>Nick Name</th>
+                        <th>Student Count</th>
+                        <th>Assigned Subjects</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 3. STAFF SECTION -->
+        <div id="section-staff" class="section" style="display:none;">
+            <h2>Staff Management</h2>
+            
+            <h3>Add New Staff Member</h3>
+            <form id="add-staff-form">
+                <label for="staff-name">Name: *</label>
+                <input type="text" id="staff-name" required>
+                
+                <label for="staff-mobile">Mobile No: * (10 digits)</label>
+                <input type="text" id="staff-mobile" maxlength="10" required>
+                
+                <label for="staff-designation">Designation: *</label>
+                <select id="staff-designation" required></select>
+                
+                <button type="submit">Add Staff</button>
+            </form>
+            
+            <h3>Existing Staff</h3>
+            <table id="staff-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Mobile No</th>
+                        <th>Designation</th>
+                        <th>Assigned Classes</th>
+                        <th>Has Credentials</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 4. SUBJECTS SECTION -->
+        <div id="section-subjects" class="section" style="display:none;">
+            <h2>Subjects Management</h2>
+            
+            <h3>Add New Subject</h3>
+            <form id="add-subject-form">
+                <label for="subject-name">Subject Name: *</label>
+                <input type="text" id="subject-name" required>
+                
+                <button type="submit">Add Subject</button>
+            </form>
+            
+            <h3>Existing Subjects</h3>
+            <table id="subjects-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Subject Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 5. STUDENTS SECTION -->
+        <div id="section-students" class="section" style="display:none;">
+            <h2>Students Management</h2>
+            
+            <h3>Upload Students (Excel File)</h3>
+            <p><strong>Excel Format Required:</strong> Name | Father Name | Class | Mobile No (10 digits only)</p>
+            <p><em>Note: Class should be mentioned same way as added in point-2 (Class Name or Nick Name)</em></p>
+            
+            <form id="bulk-upload-form">
+                <label for="student-file">Select Excel File: *</label>
+                <input type="file" id="student-file" accept=".xls,.xlsx" required>
+                
+                <button type="submit">Upload Students</button>
+            </form>
+            
+            <h3>Add Individual Student</h3>
+            <form id="add-student-form">
+                <label for="student-name">Name: *</label>
+                <input type="text" id="student-name" required>
+                
+                <label for="student-father">Father Name: *</label>
+                <input type="text" id="student-father" required>
+                
+                <label for="student-class">Class: *</label>
+                <select id="student-class" required></select>
+                
+                <label for="student-mobile">Mobile No: * (10 digits)</label>
+                <input type="text" id="student-mobile" maxlength="10" required>
+                
+                <button type="submit">Add Student</button>
+            </form>
+            
+            <h3>Search Students</h3>
+            <div>
+                <input type="text" id="search-student" placeholder="Search by name, father name, class, or mobile no">
+                <button onclick="searchStudents()">Search</button>
+                <button onclick="loadAllStudents()">Show All</button>
+            </div>
+            
+            <h3>Existing Students</h3>
+            <table id="students-table" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Father Name</th>
+                        <th>Class</th>
+                        <th>Mobile No</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- 6. HIERARCHY SECTION -->
+        <div id="section-hierarchy" class="section" style="display:none;">
+            <h2>Hierarchy Setup</h2>
+            <p><em>How many levels are there in your institutional hierarchy?</em></p>
+            
+            <form id="hierarchy-form">
+                <label for="num-levels">Choose Number of Levels: (Max 10)</label>
+                <select id="num-levels">
+                    <option value="1">Level 1</option>
+                    <option value="2">Level 2</option>
+                    <option value="3">Level 3</option>
+                    <option value="4">Level 4</option>
+                    <option value="5">Level 5</option>
+                    <option value="6">Level 6</option>
+                    <option value="7">Level 7</option>
+                    <option value="8">Level 8</option>
+                    <option value="9">Level 9</option>
+                    <option value="10">Level 10</option>
+                </select>
+                
+                <button type="button" onclick="generateHierarchyLevels()">Generate Levels</button>
+            </form>
+            
+            <div id="hierarchy-levels-container"></div>
+            
+            <button id="save-hierarchy-btn" onclick="saveHierarchy()" style="display:none;">Save Hierarchy</button>
+            
+            <h3>Current Hierarchy</h3>
+            <div id="current-hierarchy"></div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/basic-info.js"></script>
+</body>
+</html>

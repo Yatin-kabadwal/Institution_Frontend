@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #6366f1;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem 0;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        .result {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+        .info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .test-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Dashboard Diagnostic Tool</h1>
+        <p>This tool will help you diagnose why dashboard data isn't showing.</p>
+        
+        <button onclick="runDiagnostics()">🚀 Run Full Diagnostics</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function runDiagnostics() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h2>Running diagnostics...</h2>';
+            
+            let report = '';
+            
+            // Test 1: Check if logged in
+            report += '<div class="test-item">';
+            report += '<h3>Test 1: Authentication Check</h3>';
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            
+            if (token) {
+                report += '<div class="result success">✅ Token found: ' + token.substring(0, 20) + '...</div>';
+                report += '<div class="result info">📋 User Type: ' + userType + '</div>';
+            } else {
+                report += '<div class="result error">❌ No token found! Please login first.</div>';
+                report += '<button onclick="window.location.href=\'login.html\'">Go to Login</button>';
+                resultsDiv.innerHTML = report;
+                return;
+            }
+            report += '</div>';
+            
+            // Test 2: Test API Connection
+            report += '<div class="test-item">';
+            report += '<h3>Test 2: API Connection</h3>';
+            try {
+                const response = await fetch('https://institution-backend.onrender.com/api/health');
+                const data = await response.json();
+                report += '<div class="result success">✅ Backend is online</div>';
+                report += '<div class="result info">📊 Status: ' + data.status + '</div>';
+            } catch (error) {
+                report += '<div class="result error">❌ Cannot connect to backend: ' + error.message + '</div>';
+            }
+            report += '</div>';
+            
+            // Test 3: Fetch Profile Data
+            report += '<div class="test-item">';
+            report += '<h3>Test 3: Profile Data Fetch</h3>';
+            try {
+                const response = await fetch('https://institution-backend.onrender.com/api/institution/profile', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    report += '<div class="result success">✅ API call successful</div>';
+                    
+                    // Test 4: Check Data Structure
+                    report += '</div><div class="test-item">';
+                    report += '<h3>Test 4: Data Structure Analysis</h3>';
+                    
+                    const address = data.data?.address;
+                    const contacts = data.data?.contacts;
+                    
+                    // Check Address
+                    if (address === undefined) {
+                        report += '<div class="result error">❌ PROBLEM: address is undefined</div>';
+                        report += '<div class="result warning">⚠️ Backend not returning address field</div>';
+                    } else if (address === null) {
+                        report += '<div class="result error">❌ PROBLEM: address is null</div>';
+                        report += '<div class="result warning">⚠️ Address not saved in database</div>';
+                    } else if (typeof address === 'string') {
+                        report += '<div class="result error">❌ PROBLEM: address is a string, not object</div>';
+                        report += '<div class="result warning">⚠️ Data saved incorrectly: ' + address + '</div>';
+                    } else if (typeof address === 'object') {
+                        report += '<div class="result success">✅ Address is an object</div>';
+                        report += '<div class="result info">📍 State: ' + (address.state || 'MISSING') + '</div>';
+                        report += '<div class="result info">📍 District: ' + (address.district || 'MISSING') + '</div>';
+                        report += '<div class="result info">📍 City: ' + (address.city || 'MISSING') + '</div>';
+                        
+                        if (!address.state || !address.district) {
+                            report += '<div class="result warning">⚠️ Address object exists but state/district are empty</div>';
+                        }
+                    }
+                    
+                    // Check Contacts
+                    if (contacts === undefined) {
+                        report += '<div class="result error">❌ PROBLEM: contacts is undefined</div>';
+                        report += '<div class="result warning">⚠️ Backend not returning contacts field</div>';
+                    } else if (contacts === null) {
+                        report += '<div class="result error">❌ PROBLEM: contacts is null</div>';
+                        report += '<div class="result warning">⚠️ Contacts not saved in database</div>';
+                    } else if (typeof contacts === 'string') {
+                        report += '<div class="result error">❌ PROBLEM: contacts is a string, not object</div>';
+                        report += '<div class="result warning">⚠️ Data saved incorrectly: ' + contacts + '</div>';
+                    } else if (typeof contacts === 'object') {
+                        report += '<div class="result success">✅ Contacts is an object</div>';
+                        report += '<div class="result info">📞 Mobile 1: ' + (contacts.mobile1 || 'MISSING') + '</div>';
+                        report += '<div class="result info">📞 Mobile 2: ' + (contacts.mobile2 || 'MISSING') + '</div>';
+                        report += '<div class="result info">📧 Email: ' + (contacts.email || 'MISSING') + '</div>';
+                        
+                        if (!contacts.mobile1 || !contacts.email) {
+                            report += '<div class="result warning">⚠️ Contacts object exists but mobile1/email are empty</div>';
+                        }
+                    }
+                    
+                    // Show Full Response
+                    report += '</div><div class="test-item">';
+                    report += '<h3>Test 5: Full API Response</h3>';
+                    report += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    
+                    // Diagnosis
+                    report += '</div><div class="test-item">';
+                    report += '<h3>🎯 Diagnosis & Solution</h3>';
+                    
+                    if (address === null || address === undefined) {
+                        report += '<div class="result error">';
+                        report += '<h4>❌ Problem: Address data missing from database</h4>';
+                        report += '<p><strong>Solution:</strong></p>';
+                        report += '<ol>';
+                        report += '<li>Use the update page to add address data</li>';
+                        report += '<li>Or re-register with complete data</li>';
+                        report += '</ol>';
+                        report += '<button onclick="window.location.href=\'update-institution.html\'">Go to Update Page</button>';
+                        report += '</div>';
+                    }
+                    
+                    if (contacts === null || contacts === undefined) {
+                        report += '<div class="result error">';
+                        report += '<h4>❌ Problem: Contacts data missing from database</h4>';
+                        report += '<p><strong>Solution:</strong></p>';
+                        report += '<ol>';
+                        report += '<li>Update backend PUT route to accept contacts</li>';
+                        report += '<li>Use the update page to add contact data</li>';
+                        report += '</ol>';
+                        report += '<button onclick="window.location.href=\'update-institution.html\'">Go to Update Page</button>';
+                        report += '</div>';
+                    }
+                    
+                    if (typeof address === 'string' || typeof contacts === 'string') {
+                        report += '<div class="result error">';
+                        report += '<h4>❌ Problem: Data saved as strings instead of objects</h4>';
+                        report += '<p><strong>Solution:</strong></p>';
+                        report += '<ol>';
+                        report += '<li>Update backend registration controller to parse JSON</li>';
+                        report += '<li>Re-register institution</li>';
+                        report += '</ol>';
+                        report += '</div>';
+                    }
+                    
+                    if (typeof address === 'object' && address && typeof contacts === 'object' && contacts) {
+                        if (address.state && address.district && contacts.mobile1 && contacts.email) {
+                            report += '<div class="result success">';
+                            report += '<h4>✅ All data is correct!</h4>';
+                            report += '<p>If dashboard still shows "-", the problem is in the frontend JavaScript.</p>';
+                            report += '<p><strong>Solution:</strong> Update dashboard.js with better null checks.</p>';
+                            report += '<button onclick="window.location.href=\'dashboard.html\'">Go to Dashboard</button>';
+                            report += '</div>';
+                        } else {
+                            report += '<div class="result warning">';
+                            report += '<h4>⚠️ Data structure is correct but some fields are empty</h4>';
+                            report += '<p><strong>Solution:</strong> Use update page to fill in missing fields.</p>';
+                            report += '<button onclick="window.location.href=\'update-institution.html\'">Go to Update Page</button>';
+                            report += '</div>';
+                        }
+                    }
+                    
+                } else {
+                    report += '<div class="result error">❌ API returned error: ' + data.message + '</div>';
+                }
+                
+            } catch (error) {
+                report += '<div class="result error">❌ Error fetching profile: ' + error.message + '</div>';
+            }
+            report += '</div>';
+            
+            resultsDiv.innerHTML = report;
+        }
+    </script>
+</body>
+</html>

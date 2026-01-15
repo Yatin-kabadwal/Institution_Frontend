@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"></head>
+
+
+</head>
+<body>
+    <div id="verify-otp-container">
+        <h1>Verify OTP</h1>
+        
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none; color:red;"></div>
+        <div id="success-message" style="display:none; color:green;"></div>
+        
+        <p>An OTP has been sent to your registered mobile number and email.</p>
+        
+        <div id="institution-code-display">
+            <p><strong>Your Institution Code:</strong> <span id="code-value"></span></p>
+            <p><em>Please save this code. You will need it to login.</em></p>
+        </div>
+        
+        <form id="verify-otp-form">
+            <div>
+                <label for="otp">Enter OTP: *</label>
+                <input type="text" id="otp" maxlength="6" required>
+            </div>
+            
+            <br>
+            <button type="submit">Verify OTP</button>
+            <button type="button" onclick="resendOTP()">Resend OTP</button>
+        </form>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        let institutionCode = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get institution code from localStorage
+            institutionCode = localStorage.getItem('pendingInstitutionCode');
+            
+            if (!institutionCode) {
+                showError('No institution code found. Please register first.');
+                setTimeout(() => {
+                    window.location.href = 'register.html';
+                }, 2000);
+                return;
+            }
+            
+            // Display institution code
+            document.getElementById('code-value').textContent = institutionCode;
+            
+            // Handle form submission
+            const form = document.getElementById('verify-otp-form');
+            form.addEventListener('submit', handleVerifyOTP);
+        });
+        
+        async function handleVerifyOTP(e) {
+            e.preventDefault();
+            
+            const otp = document.getElementById('otp').value.trim();
+            
+            if (!otp || otp.length !== 6) {
+                showError('Please enter a valid 6-digit OTP');
+                return;
+            }
+            
+            try {
+                showLoading('Verifying OTP...');
+                
+                const response = await apiPost(API_ENDPOINTS.VERIFY_OTP, {
+                    institutionCode: institutionCode,
+                    otp: otp
+                }, false);
+                
+                hideLoading();
+                
+                if (response.success) {
+                    showSuccess(response.message);
+                    
+                    // Redirect to set password page
+                    setTimeout(() => {
+                        window.location.href = 'set-password.html';
+                    }, 1500);
+                }
+                
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+        
+        async function resendOTP() {
+            try {
+                showLoading('Resending OTP...');
+                
+                const response = await apiPost(API_ENDPOINTS.RESEND_OTP, {
+                    institutionCode: institutionCode
+                }, false);
+                
+                hideLoading();
+                
+                if (response.success) {
+                    showSuccess(response.message);
+                    // Show OTP for development
+                    alert('New OTP: ' + response.otp);
+                }
+                
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+    </script>
+</body>
+</html>

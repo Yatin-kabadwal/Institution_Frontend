@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Institution</title>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"></head>
+
+
+</head>
+<body>
+    <div id="register-container">
+        <h1>Register Your Institution</h1>
+        
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none; color:red;"></div>
+        <div id="success-message" style="display:none; color:green;"></div>
+
+        
+        <form id="register-form">
+            <h3>STEP 1: Institution Details</h3>
+            
+            <!-- Institution Name -->
+            <div>
+                <label for="name">Institution Name: *</label>
+                <input type="text" id="name" required>
+            </div>
+            
+            <!-- Institution Type -->
+            <div>
+                <label for="type">Type of Institution: *</label>
+                <select id="type" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="School">School</option>
+                    <option value="College">College</option>
+                    <option value="University">University</option>
+                    <option value="Other">Other (Specify)</option>
+                </select>
+            </div>
+            
+            <!-- Other Type (shown only if "Other" is selected) -->
+            <div id="other-type-container" style="display:none;">
+                <label for="other-type">Specify Type:</label>
+                <input type="text" id="other-type">
+            </div>
+            
+            <!-- Logo Upload -->
+            <div>
+                <label for="logo">Upload Logo: (Optional)</label>
+                <input type="file" id="logo" accept="image/*">
+            </div>
+            
+            <!-- Address Section -->
+            <h4>Address:</h4>
+            
+            <!-- State -->
+            <div>
+                <label for="state">State: *</label>
+                <select id="state" required>
+                    <option value="">-- Select State --</option>
+                </select>
+            </div>
+            
+            <!-- District -->
+            <div>
+                <label for="district">District: *</label>
+                <input type="text" id="district" required>
+            </div>
+            
+            <!-- City -->
+            <div>
+                <label for="city">City:</label>
+                <input type="text" id="city">
+            </div>
+            
+            <!-- Location -->
+            <div>
+                <label for="location">Location/Area:</label>
+                <input type="text" id="location">
+            </div>
+            
+            <!-- Contact Section -->
+            <h4>Contact Information:</h4>
+            
+            <!-- Mobile 1 (OTP) -->
+            <div>
+                <label for="mobile1">Mobile Number 1: * (OTP will be sent)</label>
+                <input type="text" id="mobile1" maxlength="10" required>
+            </div>
+            
+            <!-- Mobile 2 (Optional, OTP) -->
+            <div>
+                <label for="mobile2">Mobile Number 2: (Optional)</label>
+                <input type="text" id="mobile2" maxlength="10">
+            </div>
+            
+            <!-- Email (OTP) -->
+            <div>
+                <label for="email">Email ID: * (OTP will be sent)</label>
+                <input type="email" id="email" required>
+            </div>
+            
+            <br>
+            <button type="submit">Register & Send OTP</button>
+            <button type="button" onclick="window.location.href='index.html'">Cancel</button>
+        </form>
+        
+        <br>
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/register.js"></script>
+</body>
+</html>

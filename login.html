@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css"></head>
+
+
+</head>
+<body>
+    <div id="login-container">
+        <h1>Login to Institution Management System</h1>
+        
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none; color:red;"></div>
+        <div id="success-message" style="display:none; color:green;"></div>
+        
+        <!-- Login Type Selector -->
+        <div id="login-type-selector">
+            <h3>Select Login Type:</h3>
+            <button onclick="showInstitutionLogin()" id="institution-btn">Institution Login</button>
+            <button onclick="showStaffLogin()" id="staff-btn">Staff Login</button>
+        </div>
+        
+        <br>
+        
+        <!-- Institution Login Form -->
+        <div id="institution-login-form" style="display:none;">
+            <h2>Institution Login</h2>
+            <form id="institution-form">
+                <div>
+                    <label for="inst-code">Institution Code: *</label>
+                    <input type="text" id="inst-code" required>
+                </div>
+                
+                <div>
+                    <label for="inst-password">Password: *</label>
+                    <input type="password" id="inst-password" required>
+                </div>
+                
+                <br>
+                <button type="submit">Login</button>
+                <button type="button" onclick="window.location.href='forgot-password.html'">Forgot Password?</button>
+            </form>
+        </div>
+        
+        <!-- Staff Login Form -->
+        <div id="staff-login-form" style="display:none;">
+            <h2>Staff Login</h2>
+            <form id="staff-form">
+                <div>
+                    <label for="staff-loginid">Login ID (Mobile No): *</label>
+                    <input type="text" id="staff-loginid" maxlength="10" required>
+                </div>
+                
+                <div>
+                    <label for="staff-password">Password: *</label>
+                    <input type="password" id="staff-password" required>
+                </div>
+                
+                <br>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+        
+        <br>
+        <p>Don't have an account? <a href="register.html">Register here</a></p>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>

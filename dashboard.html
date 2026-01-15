@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Institution Dashboard - IMS by Team H2O">
+    <title>Dashboard | IMS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="dashboard-container">
+        <div id="header">
+            <h1>Institution Dashboard</h1>
+            <button onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="loading" style="display:none;">Loading...</div>
+        <div id="error-message" style="display:none;"></div>
+        <div id="success-message" style="display:none;"></div>
+        
+        <!-- Institution Profile Section -->
+        <div id="profile-section">
+            <h2>Institution Profile</h2>
+            
+            <div id="logo-container">
+                <img id="institution-logo" src="" alt="Logo" style="max-width:150px; display:none;">
+            </div>
+            
+            <div id="profile-details">
+                <p><strong>Institution Code:</strong> <span id="inst-code">-</span></p>
+                <p><strong>Name:</strong> <span id="inst-name">-</span></p>
+                <p><strong>Type:</strong> <span id="inst-type">-</span></p>
+                
+                <h4>Address:</h4>
+                <p><strong>State:</strong> <span id="inst-state">-</span></p>
+                <p><strong>District:</strong> <span id="inst-district">-</span></p>
+                <p><strong>City:</strong> <span id="inst-city">-</span></p>
+                
+                <h4>Contact Information:</h4>
+                <p><strong>Mobile 1:</strong> <span id="inst-mobile1">-</span></p>
+                <p><strong>Mobile 2:</strong> <span id="inst-mobile2">-</span></p>
+                <p><strong>Email:</strong> <span id="inst-email">-</span></p>
+                
+                <p><strong>Last Login:</strong> <span id="inst-last-login">-</span></p>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Statistics Section -->
+        <div id="stats-section">
+            <h2>Statistics</h2>
+            <div id="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Staff</h3>
+                    <p id="stat-staff">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Classes</h3>
+                    <p id="stat-classes">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Subjects</h3>
+                    <p id="stat-subjects">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Students</h3>
+                    <p id="stat-students">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <!-- Navigation to Parts -->
+        <div id="navigation-section">
+            <h2>Manage Your Institution</h2>
+            
+            <div id="nav-buttons">
+                <button onclick="goToPart1()">
+                    <h3>PART 1</h3>
+                    <p>Basic Information</p>
+                    <small>(Designations, Classes, Staff, Subjects, Students, Hierarchy)</small>
+                </button>
+                
+                <button onclick="goToPart2()">
+                    <h3>PART 2</h3>
+                    <p>Mapping</p>
+                    <small>(Assign Staff to Classes, Subjects to Classes, Teachers to Subjects)</small>
+                </button>
+                
+                <button onclick="goToPart3()">
+                    <h3>PART 3</h3>
+                    <p>Create Login ID & Password</p>
+                    <small>(Create staff login credentials)</small>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="powered-by" style="margin-top: 3rem;">
+            <p>Powered by <strong>Team H2O</strong></p>
+            <p style="font-size: 0.75rem; opacity: 0.8;">Institution Management System</p>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
