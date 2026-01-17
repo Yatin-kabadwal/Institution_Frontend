@@ -134,7 +134,6 @@ function displayProfileDetails(data) {
         const element = document.getElementById(elementId);
         if (element) {
             element.textContent = value ?? fallback;
-            // Add fade-in animation
             element.style.animation = 'fadeIn 0.4s ease-out';
         }
     };
@@ -142,7 +141,10 @@ function displayProfileDetails(data) {
     // Basic Information
     safeDisplay('inst-code', data.institutionCode);
     safeDisplay('inst-name', data.name);
-    safeDisplay('inst-type', data.type);
+    
+    // ✅ FIX: Display correct institution type
+    const institutionType = data.displayType || (data.type === 'Other' ? data.customType : data.type);
+    safeDisplay('inst-type', institutionType);
     
     // Address - Handle all possible null/undefined cases
     if (data.address && typeof data.address === 'object') {
