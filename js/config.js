@@ -20,6 +20,10 @@ const API_ENDPOINTS = {
     // Institution
     INSTITUTION_PROFILE: '/institution/profile',
     
+    // ✅ STAFF ENDPOINTS (ADDED - THESE WERE MISSING!)
+    STAFF_PROFILE: '/staff/profile',
+    STAFF_ASSIGNMENTS: '/staff/assignments',
+    
     // Designations
     DESIGNATIONS: '/designations',
     

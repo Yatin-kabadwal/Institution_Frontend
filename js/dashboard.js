@@ -142,9 +142,25 @@ function displayProfileDetails(data) {
     safeDisplay('inst-code', data.institutionCode);
     safeDisplay('inst-name', data.name);
     
-    // ✅ FIX: Display correct institution type
-    const institutionType = data.displayType || (data.type === 'Other' ? data.customType : data.type);
+    // ✅ FIXED: Display correct institution type
+    // Priority: displayType > customType (if type is Other) > type
+    let institutionType = data.type || '-';
+    
+    if (data.displayType) {
+        // If backend provides displayType, use it
+        institutionType = data.displayType;
+    } else if (data.type === 'Other' && data.customType) {
+        // If type is Other and customType exists, show customType
+        institutionType = data.customType;
+    }
+    
     safeDisplay('inst-type', institutionType);
+    console.log('📝 Institution Type Display:', {
+        type: data.type,
+        customType: data.customType,
+        displayType: data.displayType,
+        final: institutionType
+    });
     
     // Address - Handle all possible null/undefined cases
     if (data.address && typeof data.address === 'object') {
