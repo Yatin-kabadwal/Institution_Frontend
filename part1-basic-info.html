@@ -3,245 +3,750 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Part 1 - Basic Information</title>
-     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>Part 1 - Basic Information | IMS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css"></head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- SheetJS for Excel support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* Part 1 Specific Styles */
+        body {
+            background: var(--gray-50);
+        }
 
+        #part1-container {
+            min-height: 100vh;
+            padding-bottom: var(--space-10);
+        }
 
+        /* Enhanced Header */
+        #header {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: var(--space-6) var(--space-8);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            background: none;
+            -webkit-text-fill-color: var(--white);
+            font-weight: 800;
+        }
+
+        #header > div {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        #header button {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all var(--duration-200) var(--ease-out);
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+        }
+
+        #header button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+
+        /* Messages */
+        #loading,
+        #error-message,
+        #success-message {
+            display: none !important;
+            margin: var(--space-6) 0;
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+        }
+
+        #loading.show { display: block !important; background: var(--warning-50); color: var(--warning-700); border: 2px solid var(--warning-500); }
+        #error-message.show { display: block !important; background: var(--error-50); color: var(--error-700); border: 2px solid var(--error-500); }
+        #success-message.show { display: block !important; background: var(--success-50); color: var(--success-700); border: 2px solid var(--success-500); }
+
+        /* Section Tabs - Enhanced */
+        #section-tabs {
+            display: flex;
+            gap: var(--space-2);
+            background: var(--white);
+            padding: var(--space-4);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+            margin: var(--space-8) 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            border: 2px solid var(--gray-200);
+        }
+
+        #section-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        #section-tabs::-webkit-scrollbar-thumb {
+            background: var(--primary-500);
+            border-radius: var(--radius-full);
+        }
+
+        #section-tabs button {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+            min-width: 140px;
+            padding: var(--space-4) var(--space-6);
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid transparent;
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            transition: all var(--duration-200) var(--ease-out);
+            position: relative;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        #section-tabs button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-full);
+            transition: transform var(--duration-300) var(--ease-out);
+        }
+
+        #section-tabs button:hover {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            transform: translateY(-2px);
+        }
+
+        #section-tabs button[style*="font-weight: bold"],
+        #section-tabs button.active {
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-600);
+        }
+
+        #section-tabs button[style*="font-weight: bold"]::after,
+        #section-tabs button.active::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        /* Section Container */
+        .section {
+            display: none;
+            background: var(--white);
+            border-radius: var(--radius-3xl);
+            padding: var(--space-10);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--space-8);
+            border: 2px solid var(--gray-200);
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .section h2 {
+            color: var(--gray-900);
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .section > p {
+            color: var(--gray-600);
+            margin-bottom: var(--space-6);
+            font-size: var(--text-base);
+        }
+
+        .section h3 {
+            color: var(--primary-700);
+            font-size: var(--text-xl);
+            margin: var(--space-8) 0 var(--space-4) 0;
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--primary-200);
+        }
+
+        /* Enhanced Forms */
+        form {
+            background: var(--gray-50);
+            padding: var(--space-8);
+            border-radius: var(--radius-2xl);
+            border: 2px solid var(--gray-200);
+            margin-bottom: var(--space-8);
+            transition: all var(--duration-300) var(--ease-out);
+        }
+
+        form:hover {
+            border-color: var(--primary-300);
+            box-shadow: var(--shadow-md);
+        }
+
+        form > div {
+            margin-bottom: var(--space-6);
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wide);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        input[type="number"],
+        input[type="date"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: var(--space-4) var(--space-6);
+            font-size: var(--text-base);
+            font-family: inherit;
+            color: var(--gray-900);
+            background: var(--white);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            transition: all var(--duration-200) var(--ease-out);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: var(--gray-400);
+        }
+
+        /* Enhanced Tables */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: var(--space-8) 0;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            background: var(--white);
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead {
+            background: var(--gradient-primary);
+            color: var(--white);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-10);
+        }
+
+        thead th {
+            padding: var(--space-5) var(--space-6);
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wider);
+            font-size: var(--text-sm);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--gray-200);
+            transition: all var(--duration-200) var(--ease-out);
+        }
+
+        tbody tr:hover {
+            background: var(--primary-50);
+            transform: scale(1.01);
+            box-shadow: var(--shadow-sm);
+        }
+
+        tbody td {
+            padding: var(--space-5) var(--space-6);
+            color: var(--gray-700);
+            font-size: var(--text-sm);
+        }
+
+        tbody td button {
+            padding: var(--space-2) var(--space-4);
+            font-size: var(--text-xs);
+            margin: 0 var(--space-1);
+            min-height: auto;
+        }
+
+        /* Student Bulk Upload Section */
+        .upload-section {
+            background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+            padding: var(--space-8);
+            border-radius: var(--radius-2xl);
+            border: 2px solid var(--primary-300);
+            margin-bottom: var(--space-8);
+        }
+
+        .upload-section h3 {
+            color: var(--primary-900);
+            border-bottom-color: var(--primary-400);
+        }
+
+        .download-template-btn {
+            background: var(--white);
+            color: var(--primary-600);
+            border: 2px solid var(--primary-600);
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-xl);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--duration-200) var(--ease-out);
+        }
+
+        .download-template-btn:hover {
+            background: var(--primary-600);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        #upload-results {
+            display: none;
+            margin-top: var(--space-6);
+            padding: var(--space-6);
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--success-500);
+        }
+
+        #upload-results.show {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .search-container input {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-container button {
+            min-width: 120px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #header {
+                flex-direction: column;
+                text-align: center;
+                padding: var(--space-5);
+            }
+
+            #section-tabs {
+                padding: var(--space-3);
+            }
+
+            #section-tabs button {
+                min-width: 120px;
+                font-size: var(--text-xs);
+            }
+
+            .section {
+                padding: var(--space-6);
+            }
+
+            form {
+                padding: var(--space-6);
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .search-container input,
+            .search-container button {
+                width: 100%;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="part1-container">
+        <!-- Header -->
         <div id="header">
-            <h1>PART 1: Basic Information Management</h1>
-            <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
-            <button onclick="logout()">Logout</button>
-        </div>
-        
-        <div id="loading" style="display:none;">Loading...</div>
-        <div id="error-message" style="display:none; color:red;"></div>
-        <div id="success-message" style="display:none; color:green;"></div>
-        
-        <!-- Section Navigation -->
-        <div id="section-tabs">
-            <button onclick="showSection('designations')" id="tab-designations">1. Designations</button>
-            <button onclick="showSection('classes')" id="tab-classes">2. Classes</button>
-            <button onclick="showSection('staff')" id="tab-staff">3. Staff</button>
-            <button onclick="showSection('subjects')" id="tab-subjects">4. Subjects</button>
-            <button onclick="showSection('students')" id="tab-students">5. Students</button>
-            <button onclick="showSection('hierarchy')" id="tab-hierarchy">6. Hierarchy</button>
-        </div>
-        
-        <hr>
-        
-        <!-- 1. DESIGNATIONS SECTION -->
-        <div id="section-designations" class="section" style="display:none;">
-            <h2>Designations Management</h2>
-            <p><em>(Principal, Vice Principal, Director, Teacher, Coordinator, etc.)</em></p>
-            
-            <h3>Add New Designation</h3>
-            <form id="add-designation-form">
-                <label for="des-name">Designation Name: *</label>
-                <input type="text" id="des-name" required>
-                
-                <label for="des-level">Level: (Optional, 1-10)</label>
-                <input type="number" id="des-level" min="1" max="10">
-                
-                <button type="submit">Add Designation</button>
-            </form>
-            
-            <h3>Existing Designations</h3>
-            <table id="designations-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Level</th>
-                        <th>Staff Count</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- 2. CLASSES SECTION -->
-        <div id="section-classes" class="section" style="display:none;">
-            <h2>Classes Management</h2>
-            
-            <h3>Add New Class</h3>
-            <form id="add-class-form">
-                <label for="class-name">Class Name: *</label>
-                <input type="text" id="class-name" required>
-                
-                <label for="class-nickname">Nick Name: (Optional)</label>
-                <input type="text" id="class-nickname">
-                
-                <button type="submit">Add Class</button>
-            </form>
-            
-            <h3>Existing Classes</h3>
-            <table id="classes-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Class Name</th>
-                        <th>Nick Name</th>
-                        <th>Student Count</th>
-                        <th>Assigned Subjects</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- 3. STAFF SECTION -->
-        <div id="section-staff" class="section" style="display:none;">
-            <h2>Staff Management</h2>
-            
-            <h3>Add New Staff Member</h3>
-            <form id="add-staff-form">
-                <label for="staff-name">Name: *</label>
-                <input type="text" id="staff-name" required>
-                
-                <label for="staff-mobile">Mobile No: * (10 digits)</label>
-                <input type="text" id="staff-mobile" maxlength="10" required>
-                
-                <label for="staff-designation">Designation: *</label>
-                <select id="staff-designation" required></select>
-                
-                <button type="submit">Add Staff</button>
-            </form>
-            
-            <h3>Existing Staff</h3>
-            <table id="staff-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Mobile No</th>
-                        <th>Designation</th>
-                        <th>Assigned Classes</th>
-                        <th>Has Credentials</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- 4. SUBJECTS SECTION -->
-        <div id="section-subjects" class="section" style="display:none;">
-            <h2>Subjects Management</h2>
-            
-            <h3>Add New Subject</h3>
-            <form id="add-subject-form">
-                <label for="subject-name">Subject Name: *</label>
-                <input type="text" id="subject-name" required>
-                
-                <button type="submit">Add Subject</button>
-            </form>
-            
-            <h3>Existing Subjects</h3>
-            <table id="subjects-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Subject Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- 5. STUDENTS SECTION -->
-        <div id="section-students" class="section" style="display:none;">
-            <h2>Students Management</h2>
-            
-            <h3>Upload Students (Excel File)</h3>
-            <p><strong>Excel Format Required:</strong> Name | Father Name | Class | Mobile No (10 digits only)</p>
-            <p><em>Note: Class should be mentioned same way as added in point-2 (Class Name or Nick Name)</em></p>
-            
-            <form id="bulk-upload-form">
-                <label for="student-file">Select Excel File: *</label>
-                <input type="file" id="student-file" accept=".xls,.xlsx" required>
-                
-                <button type="submit">Upload Students</button>
-            </form>
-            
-            <h3>Add Individual Student</h3>
-            <form id="add-student-form">
-                <label for="student-name">Name: *</label>
-                <input type="text" id="student-name" required>
-                
-                <label for="student-father">Father Name: *</label>
-                <input type="text" id="student-father" required>
-                
-                <label for="student-class">Class: *</label>
-                <select id="student-class" required></select>
-                
-                <label for="student-mobile">Mobile No: * (10 digits)</label>
-                <input type="text" id="student-mobile" maxlength="10" required>
-                
-                <button type="submit">Add Student</button>
-            </form>
-            
-            <h3>Search Students</h3>
+            <h1>📋 PART 1: Basic Information Management</h1>
             <div>
-                <input type="text" id="search-student" placeholder="Search by name, father name, class, or mobile no">
-                <button onclick="searchStudents()">Search</button>
-                <button onclick="loadAllStudents()">Show All</button>
+                <button onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+                <button onclick="logout()">Logout</button>
             </div>
-            
-            <h3>Existing Students</h3>
-            <table id="students-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Father Name</th>
-                        <th>Class</th>
-                        <th>Mobile No</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
         </div>
-        
-        <!-- 6. HIERARCHY SECTION -->
-        <div id="section-hierarchy" class="section" style="display:none;">
-            <h2>Hierarchy Setup</h2>
-            <p><em>How many levels are there in your institutional hierarchy?</em></p>
-            
-            <form id="hierarchy-form">
-                <label for="num-levels">Choose Number of Levels: (Max 10)</label>
-                <select id="num-levels">
-                    <option value="1">Level 1</option>
-                    <option value="2">Level 2</option>
-                    <option value="3">Level 3</option>
-                    <option value="4">Level 4</option>
-                    <option value="5">Level 5</option>
-                    <option value="6">Level 6</option>
-                    <option value="7">Level 7</option>
-                    <option value="8">Level 8</option>
-                    <option value="9">Level 9</option>
-                    <option value="10">Level 10</option>
-                </select>
-                
-                <button type="button" onclick="generateHierarchyLevels()">Generate Levels</button>
-            </form>
-            
-            <div id="hierarchy-levels-container"></div>
-            
-            <button id="save-hierarchy-btn" onclick="saveHierarchy()" style="display:none;">Save Hierarchy</button>
-            
-            <h3>Current Hierarchy</h3>
-            <div id="current-hierarchy"></div>
+
+        <div class="container">
+            <!-- Messages -->
+            <div id="loading" style="display:none;">⏳ Loading...</div>
+            <div id="error-message" style="display:none;"></div>
+            <div id="success-message" style="display:none;"></div>
+
+            <!-- Section Navigation -->
+            <div id="section-tabs">
+                <button onclick="showSection('designations')" id="tab-designations">1️⃣ Designations</button>
+                <button onclick="showSection('classes')" id="tab-classes">2️⃣ Classes</button>
+                <button onclick="showSection('staff')" id="tab-staff">3️⃣ Staff</button>
+                <button onclick="showSection('subjects')" id="tab-subjects">4️⃣ Subjects</button>
+                <button onclick="showSection('students')" id="tab-students">5️⃣ Students</button>
+                <button onclick="showSection('hierarchy')" id="tab-hierarchy">6️⃣ Hierarchy</button>
+            </div>
+
+            <!-- 1. DESIGNATIONS SECTION -->
+            <div id="section-designations" class="section" style="display:none;">
+                <h2>🏆 Designations Management</h2>
+                <p><em>Manage roles like Principal, Vice Principal, Director, Teacher, Coordinator, etc.</em></p>
+
+                <h3>➕ Add New Designation</h3>
+                <form id="add-designation-form">
+                    <div>
+                        <label for="des-name">Designation Name *</label>
+                        <input type="text" id="des-name" placeholder="e.g., Principal, Teacher, Coordinator" required>
+                    </div>
+
+                    <div>
+                        <label for="des-level">Level (Optional, 1-10)</label>
+                        <input type="number" id="des-level" min="1" max="10" placeholder="Hierarchy level">
+                    </div>
+
+                    <button type="submit">Add Designation</button>
+                </form>
+
+                <h3>📊 Existing Designations</h3>
+                <div class="table-wrapper">
+                    <table id="designations-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Level</th>
+                                <th>Staff Count</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. CLASSES SECTION -->
+            <div id="section-classes" class="section" style="display:none;">
+                <h2>📚 Classes Management</h2>
+                <p><em>Manage all your institution's classes</em></p>
+
+                <h3>➕ Add New Class</h3>
+                <form id="add-class-form">
+                    <div>
+                        <label for="class-name">Class Name *</label>
+                        <input type="text" id="class-name" placeholder="e.g., 10th Grade, BSc 1st Year" required>
+                    </div>
+
+                    <div>
+                        <label for="class-nickname">Nick Name (Optional)</label>
+                        <input type="text" id="class-nickname" placeholder="Short name or code">
+                    </div>
+
+                    <button type="submit">Add Class</button>
+                </form>
+
+                <h3>📊 Existing Classes</h3>
+                <div class="table-wrapper">
+                    <table id="classes-table">
+                        <thead>
+                            <tr>
+                                <th>Class Name</th>
+                                <th>Nick Name</th>
+                                <th>Student Count</th>
+                                <th>Assigned Subjects</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. STAFF SECTION -->
+            <div id="section-staff" class="section" style="display:none;">
+                <h2>👨‍🏫 Staff Management</h2>
+                <p><em>Manage all staff members</em></p>
+
+                <h3>➕ Add New Staff Member</h3>
+                <form id="add-staff-form">
+                    <div>
+                        <label for="staff-name">Name *</label>
+                        <input type="text" id="staff-name" placeholder="Full name" required>
+                    </div>
+
+                    <div>
+                        <label for="staff-mobile">Mobile No * (10 digits)</label>
+                        <input type="tel" id="staff-mobile" maxlength="10" placeholder="10-digit mobile number" required>
+                    </div>
+
+                    <div>
+                        <label for="staff-designation">Designation *</label>
+                        <select id="staff-designation" required>
+                            <option value="">-- Select Designation --</option>
+                        </select>
+                    </div>
+
+                    <button type="submit">Add Staff</button>
+                </form>
+
+                <h3>📊 Existing Staff</h3>
+                <div class="table-wrapper">
+                    <table id="staff-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile No</th>
+                                <th>Designation</th>
+                                <th>Assigned Classes</th>
+                                <th>Has Credentials</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. SUBJECTS SECTION -->
+            <div id="section-subjects" class="section" style="display:none;">
+                <h2>📖 Subjects Management</h2>
+                <p><em>Manage all subjects taught in your institution</em></p>
+
+                <h3>➕ Add New Subject</h3>
+                <form id="add-subject-form">
+                    <div>
+                        <label for="subject-name">Subject Name *</label>
+                        <input type="text" id="subject-name" placeholder="e.g., Mathematics, Physics" required>
+                    </div>
+
+                    <button type="submit">Add Subject</button>
+                </form>
+
+                <h3>📊 Existing Subjects</h3>
+                <div class="table-wrapper">
+                    <table id="subjects-table">
+                        <thead>
+                            <tr>
+                                <th>Subject Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. STUDENTS SECTION -->
+            <div id="section-students" class="section" style="display:none;">
+                <h2>🎓 Students Management</h2>
+                <p><em>Manage student records - add individually or bulk upload</em></p>
+
+                <!-- Bulk Upload Section -->
+                <div class="upload-section">
+                    <h3>📊 Bulk Upload Students (Excel)</h3>
+                    <p style="margin-bottom: var(--space-4);"><strong>Step 1:</strong> Download the template</p>
+                    <button type="button" class="download-template-btn" onclick="downloadStudentTemplate()">
+                        📥 Download Excel Template
+                    </button>
+
+                    <form id="bulk-upload-form" style="margin-top: var(--space-6); background: white;">
+                        <div>
+                            <label for="bulk-class-select">Select Class *</label>
+                            <select id="bulk-class-select" required>
+                                <option value="">Choose a class...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="student-file">Upload Excel File *</label>
+                            <input type="file" id="student-file" accept=".xls,.xlsx" required>
+                            <small style="display: block; margin-top: var(--space-2); color: var(--gray-600);">
+                                Formats: .xlsx, .xls (Max 10MB)
+                            </small>
+                        </div>
+
+                        <button type="submit">📤 Upload Students</button>
+                    </form>
+
+                    <div id="upload-results">
+                        <h4>Upload Results:</h4>
+                        <div id="upload-stats"></div>
+                    </div>
+                </div>
+
+                <h3>➕ Add Individual Student</h3>
+                <form id="add-student-form">
+                    <div>
+                        <label for="student-name">Name *</label>
+                        <input type="text" id="student-name" placeholder="Student's full name" required>
+                    </div>
+
+                    <div>
+                        <label for="student-father">Father Name *</label>
+                        <input type="text" id="student-father" placeholder="Father's full name" required>
+                    </div>
+
+                    <div>
+                        <label for="student-class">Class *</label>
+                        <select id="student-class" required>
+                            <option value="">Select class...</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="student-mobile">Mobile * (10 digits)</label>
+                        <input type="tel" id="student-mobile" maxlength="10" placeholder="10-digit mobile number" required>
+                    </div>
+
+                    <button type="submit">Add Student</button>
+                </form>
+
+                <h3>🔍 Search Students</h3>
+                <div class="search-container">
+                    <input type="text" id="search-student" placeholder="🔍 Search by name, father name, class, or mobile...">
+                    <button onclick="searchStudents()">Search</button>
+                    <button onclick="loadAllStudents()">Show All</button>
+                </div>
+
+                <h3>📊 Students List</h3>
+                <div class="table-wrapper">
+                    <table id="students-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Father Name</th>
+                                <th>Class</th>
+                                <th>Mobile No</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6. HIERARCHY SECTION -->
+            <div id="section-hierarchy" class="section" style="display:none;">
+                <h2>🏗️ Hierarchy Setup</h2>
+                <p><em>Define your institutional hierarchy levels</em></p>
+
+                <form id="hierarchy-form">
+                    <div>
+                        <label for="num-levels">Number of Hierarchy Levels (Max 10)</label>
+                        <select id="num-levels">
+                            <option value="1">1 Level</option>
+                            <option value="2">2 Levels</option>
+                            <option value="3">3 Levels</option>
+                            <option value="4">4 Levels</option>
+                            <option value="5">5 Levels</option>
+                            <option value="6">6 Levels</option>
+                            <option value="7">7 Levels</option>
+                            <option value="8">8 Levels</option>
+                            <option value="9">9 Levels</option>
+                            <option value="10">10 Levels</option>
+                        </select>
+                    </div>
+
+                    <button type="button" onclick="generateHierarchyLevels()">Generate Levels</button>
+                </form>
+
+                <div id="hierarchy-levels-container"></div>
+
+                <button id="save-hierarchy-btn" onclick="saveHierarchy()" style="display:none;">Save Hierarchy</button>
+
+                <h3>📊 Current Hierarchy</h3>
+                <div id="current-hierarchy" style="background: var(--gray-50); padding: var(--space-6); border-radius: var(--radius-xl); border: 2px solid var(--gray-200);">
+                    <p>No hierarchy defined yet.</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/basic-info.js"></script>
+    <script src="js/students-bulk.js"></script>
 </body>
 </html>

@@ -1,248 +1,422 @@
-// staff-dashboard.js - FINAL CORRECTED VERSION
+// staff-dashboard.js - ENHANCED WITH ANIMATIONS & BETTER UX
 
-let staffData = null;
-let credentialData = null;
-let institutionData = null;
-let staffClassMappings = null;
-let teacherSubjectMappings = null;
+// ===============================
+// INITIALIZATION
+// ===============================
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (!checkAuth()) return;
-
-    const userType = localStorage.getItem('userType');
-    if (userType !== 'staff') {
-        showError('Unauthorized access. Please login as staff.');
-        setTimeout(() => window.location.href = 'login.html', 1500);
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Staff Dashboard initializing...');
+    
+    // Check authentication
+    if (!checkAuth()) {
+        console.error('Authentication failed');
         return;
     }
-
+    
+    // Verify this is a staff user (not institution)
+    const userType = localStorage.getItem('userType');
+    
+    if (userType === 'institution') {
+        console.log('Institution user detected, redirecting to institution dashboard...');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+    
+    if (userType !== 'staff') {
+        showError('Unauthorized access. Please login as staff.');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+        return;
+    }
+    
+    console.log('✅ Authentication verified - Staff user');
+    
+    // Load dashboard data
     loadStaffDashboard();
 });
 
-/* ======================================================
-   MAIN DASHBOARD LOADER
-====================================================== */
+// ===============================
+// MAIN DASHBOARD LOADER
+// ===============================
+
 async function loadStaffDashboard() {
     try {
         showLoading('Loading your dashboard...');
-
-        /* ✅ STAFF PROFILE */
-        const profileRes = await apiGet('/staff/profile', true);
-
-        if (!profileRes.success) {
-            throw new Error('Failed to load staff profile');
-        }
-
-        staffData = profileRes.data.staff;
-        credentialData = profileRes.data.credential;
-
-        displayStaffProfile();
-
-        /* ✅ INSTITUTION INFO (FROM LOCALSTORAGE) */
-        displayInstitutionInfo();
-
-        /* ✅ STAFF ASSIGNMENTS (NEW ENDPOINT) */
-        await loadStaffAssignments();
-
-        hideLoading();
-
-    } catch (err) {
-        hideLoading();
-        console.error('Dashboard load error:', err);
-        showError(err.message || 'Failed to load dashboard');
         
-        // If unauthorized, redirect to login
-        if (err.message.includes('Unauthorized') || err.message.includes('401')) {
-            setTimeout(() => {
-                logout();
-            }, 2000);
+        // Fetch staff profile
+        const profileResponse = await apiGet(API_ENDPOINTS.STAFF_PROFILE, true);
+        
+        console.log('📊 Staff Profile API Response:', profileResponse);
+        
+        if (!profileResponse.success) {
+            throw new Error(profileResponse.message || 'Failed to load profile data');
         }
+
+        const data = profileResponse.data;
+
+        if (!data) {
+            throw new Error('No data received from server');
+        }
+        
+        // Display profile with animations
+        displayStaffProfile(data);
+        
+        // Fetch assignments
+        await loadStaffAssignments();
+        
+        hideLoading();
+        
+        console.log('✅ Staff Dashboard loaded successfully');
+        
+    } catch (error) {
+        hideLoading();
+        console.error('❌ Error loading staff dashboard:', error);
+        showError(error.message || 'Failed to load dashboard data');
     }
 }
 
-/* ======================================================
-   STAFF PROFILE DISPLAY
-====================================================== */
-function displayStaffProfile() {
-    if (!staffData || !credentialData) return;
+// ===============================
+// DISPLAY STAFF PROFILE
+// ===============================
 
-    document.getElementById('staff-name-header').textContent = staffData.name;
-
-    document.getElementById('staff-name').textContent = staffData.name;
-    document.getElementById('staff-mobile').textContent = staffData.mobileNo || '-';
-    document.getElementById('staff-login-id').textContent = credentialData.loginId;
-    document.getElementById('staff-designation').textContent =
-        staffData.designationId?.name || staffData.designation || 'N/A';
-
-    document.getElementById('staff-access-level').textContent =
-        credentialData.accessLevel.toUpperCase();
-
-    document.getElementById('staff-status').textContent =
-        credentialData.isActive ? '✅ Active' : '❌ Inactive';
-
-    document.getElementById('staff-last-login').textContent =
-        credentialData.lastLogin
-            ? new Date(credentialData.lastLogin).toLocaleString()
-            : 'First login';
-
-    displayPermissions();
-    setupAccessBasedFeatures();
-}
-
-/* ======================================================
-   PERMISSIONS
-====================================================== */
-function displayPermissions() {
-    const el = document.getElementById('permissions-list');
-    if (!credentialData) return;
-
-    const map = {
-        admin: [
-            '✅ Full System Access',
-            '✅ Manage Staff',
-            '✅ Manage Students',
-            '✅ View All Reports'
-        ],
-        coordinator: [
-            '✅ Manage Classes',
-            '✅ View Students',
-            '✅ Manage Schedules'
-        ],
-        teacher: [
-            '✅ Take Attendance',
-            '✅ View Assigned Classes',
-            '✅ View Student Lists'
-        ]
-    };
-
-    const permissions = map[credentialData.accessLevel] || [];
-    el.innerHTML = permissions.map(p => `<p>${p}</p>`).join('');
-}
-
-/* ======================================================
-   ACCESS BASED UI
-====================================================== */
-function setupAccessBasedFeatures() {
-    const level = credentialData.accessLevel;
-
-    // Attendance button - for all staff with teaching assignments
-    if (['teacher', 'coordinator', 'admin'].includes(level)) {
-        document.getElementById('attendance-btn').style.display = 'block';
-        document.getElementById('teaching-subjects-card').style.display = 'block';
-    }
-
-    // Schedule management - for coordinators and admins
-    if (['coordinator', 'admin'].includes(level)) {
-        document.getElementById('schedule-btn').style.display = 'block';
-    }
-
-    // Staff directory - admin only
-    if (level === 'admin') {
-        document.getElementById('view-staff-btn').style.display = 'block';
-    }
-}
-
-/* ======================================================
-   INSTITUTION INFO - FROM LOCALSTORAGE
-====================================================== */
-function displayInstitutionInfo() {
-    // Get institution info from localStorage (saved during login)
-    const instCode = localStorage.getItem('institutionCode') || '-';
+function displayStaffProfile(data) {
+    console.log('📋 Displaying staff profile:', data);
     
-    document.getElementById('inst-name').textContent = '-';
-    document.getElementById('inst-type').textContent = '-';
-    document.getElementById('inst-code').textContent = instCode;
+    // Update welcome banner
+    const nameDisplay = document.getElementById('staff-name-display');
+    if (nameDisplay && data.staff) {
+        nameDisplay.textContent = data.staff.name || 'Staff Member';
+    }
+    
+    // Update institution info
+    const instNameDisplay = document.getElementById('inst-name-display');
+    const instCodeDisplay = document.getElementById('inst-code-display');
+    
+    const institutionCode = localStorage.getItem('institutionCode');
+    if (instCodeDisplay) {
+        instCodeDisplay.textContent = institutionCode || 'N/A';
+    }
+    if (instNameDisplay) {
+        instNameDisplay.textContent = 'Institution'; // Could fetch from API if needed
+    }
+    
+    // Profile details - Staff info
+    if (data.staff) {
+        safeDisplay('staff-name', data.staff.name);
+        safeDisplay('staff-mobile', data.staff.mobile);
+        safeDisplay('staff-designation', data.staff.designation?.name || 'Not Assigned');
+    }
+    
+    // Profile details - Credential info
+    if (data.credential) {
+        safeDisplay('staff-loginid', data.credential.loginId);
+        
+        // Access Level with badge
+        const accessElement = document.getElementById('staff-access-level');
+        if (accessElement && data.credential.accessLevel) {
+            const accessLevel = data.credential.accessLevel;
+            const badge = document.createElement('span');
+            badge.className = `access-badge access-${accessLevel}`;
+            badge.textContent = accessLevel.toUpperCase();
+            accessElement.innerHTML = '';
+            accessElement.appendChild(badge);
+        }
+        
+        // Status with badge
+        const statusElement = document.getElementById('staff-status');
+        if (statusElement) {
+            const isActive = data.credential.isActive;
+            const badge = document.createElement('span');
+            badge.className = `status-badge ${isActive ? 'status-active' : 'status-inactive'}`;
+            badge.textContent = isActive ? 'ACTIVE' : 'INACTIVE';
+            statusElement.innerHTML = '';
+            statusElement.appendChild(badge);
+        }
+        
+        // Display permissions based on access level
+        displayPermissions(data.credential);
+    }
 }
 
-/* ======================================================
-   STAFF ASSIGNMENTS - NEW ENDPOINT
-====================================================== */
+// ===============================
+// LOAD STAFF ASSIGNMENTS
+// ===============================
+
 async function loadStaffAssignments() {
     try {
-        const res = await apiGet('/staff/assignments', true);
+        const response = await apiGet(API_ENDPOINTS.STAFF_ASSIGNMENTS, true);
         
-        if (!res.success) {
-            throw new Error('Failed to load assignments');
+        console.log('📚 Staff Assignments API Response:', response);
+        
+        if (!response.success) {
+            console.warn('Failed to load assignments:', response.message);
+            return;
         }
         
-        staffClassMappings = res.data.classMapping;
-        teacherSubjectMappings = res.data.subjectMappings || [];
+        const data = response.data;
         
-        displayAssignedClasses();
-        displayTeachingSubjects();
+        // Display assigned classes
+        if (data.classMapping && data.classMapping.classes) {
+            displayAssignedClasses(data.classMapping.classes);
+        }
         
-    } catch (err) {
-        console.warn('Assignments load error:', err.message);
-        // Show empty state instead of error
-        displayAssignedClasses();
-        displayTeachingSubjects();
+        // Display teaching subjects
+        if (data.subjectMappings && data.subjectMappings.length > 0) {
+            displayTeachingSubjects(data.subjectMappings);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading assignments:', error);
+        // Don't show error to user, just log it
     }
 }
 
-function displayAssignedClasses() {
-    const el = document.getElementById('assigned-classes-list');
+// ===============================
+// DISPLAY ASSIGNED CLASSES
+// ===============================
+
+function displayAssignedClasses(classes) {
+    const container = document.getElementById('classes-list');
+    if (!container) return;
     
-    if (!staffClassMappings?.assignedClasses?.length) {
-        el.innerHTML = '<p style="color: #666;">No classes assigned yet</p>';
-        return;
-    }
-
-    el.innerHTML = staffClassMappings.assignedClasses
-        .map(c => {
-            const className = c.nickname || c.className;
-            return `<div style="padding: 0.5rem; background: #f5f5f5; border-radius: 4px; margin-bottom: 0.5rem;">
-                <strong>${className}</strong>
-            </div>`;
-        })
-        .join('');
-}
-
-function displayTeachingSubjects() {
-    const el = document.getElementById('teaching-subjects-list');
-    
-    if (!teacherSubjectMappings || teacherSubjectMappings.length === 0) {
-        el.innerHTML = '<p style="color: #666;">No subjects assigned yet</p>';
-        return;
-    }
-
-    el.innerHTML = teacherSubjectMappings.map(m => {
-        const className = m.classId?.nickname || m.classId?.className || 'Unknown Class';
-        const subjects = m.subjectIds?.map(s => s.subjectName || s).join(', ') || 'No subjects';
-        
-        return `
-            <div style="padding: 0.75rem; background: #f5f5f5; border-radius: 4px; margin-bottom: 0.5rem;">
-                <strong style="display: block; margin-bottom: 0.25rem;">${className}</strong>
-                <p style="margin: 0; color: #666; font-size: 0.9rem;">${subjects}</p>
+    if (!classes || classes.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <p>📭 No classes assigned yet</p>
+                <small>Classes will appear here once assigned by admin</small>
             </div>
         `;
-    }).join('');
-}
-
-/* ======================================================
-   QUICK ACTIONS
-====================================================== */
-function goToAttendance() {
-    // Check if staff has coordinator or admin access
-    if (credentialData.accessLevel === 'coordinator' || credentialData.accessLevel === 'admin') {
-        window.location.href = 'staff-attendance.html';
         return;
     }
     
-    if (!teacherSubjectMappings || teacherSubjectMappings.length === 0) {
-        showError('No teaching assignments found. Please contact administrator.');
+    container.innerHTML = '';
+    
+    classes.forEach((className, index) => {
+        const card = document.createElement('div');
+        card.className = 'class-card';
+        card.style.animationDelay = `${index * 0.1}s`;
+        
+        card.innerHTML = `
+            <h4>${sanitizeHTML(className)}</h4>
+            <p>Assigned Class</p>
+        `;
+        
+        container.appendChild(card);
+    });
+}
+
+// ===============================
+// DISPLAY TEACHING SUBJECTS
+// ===============================
+
+function displayTeachingSubjects(subjectMappings) {
+    const section = document.getElementById('subjects-section');
+    const container = document.getElementById('subjects-list');
+    
+    if (!section || !container) return;
+    
+    if (!subjectMappings || subjectMappings.length === 0) {
+        section.style.display = 'none';
         return;
     }
-    window.location.href = 'staff-attendance.html';
+    
+    // Show section
+    section.style.display = 'block';
+    container.innerHTML = '';
+    
+    // Group subjects by class
+    const subjectsByClass = {};
+    
+    subjectMappings.forEach(mapping => {
+        const className = mapping.class?.name || 'Unknown Class';
+        if (!subjectsByClass[className]) {
+            subjectsByClass[className] = [];
+        }
+        mapping.subjects.forEach(subject => {
+            if (subject.name && !subjectsByClass[className].includes(subject.name)) {
+                subjectsByClass[className].push(subject.name);
+            }
+        });
+    });
+    
+    // Display subjects
+    let index = 0;
+    for (const [className, subjects] of Object.entries(subjectsByClass)) {
+        subjects.forEach(subject => {
+            const card = document.createElement('div');
+            card.className = 'subject-card';
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            card.innerHTML = `
+                <h4>${sanitizeHTML(subject)}</h4>
+                <p>in ${sanitizeHTML(className)}</p>
+            `;
+            
+            container.appendChild(card);
+            index++;
+        });
+    }
 }
 
-function viewStudents() {
-    window.location.href = 'staff-students.html';
+// ===============================
+// DISPLAY PERMISSIONS
+// ===============================
+
+function displayPermissions(credential) {
+    const container = document.getElementById('permissions-list');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    const accessLevel = credential.accessLevel;
+    const canAccessAllClasses = credential.canAccessAllClasses;
+    
+    // Define permissions based on access level
+    let permissions = [];
+    
+    if (accessLevel === 'teacher') {
+        permissions = [
+            { icon: '👀', text: 'View assigned classes' },
+            { icon: '📚', text: 'View teaching subjects' },
+            { icon: '👥', text: 'View student information' },
+            { icon: '✅', text: 'Mark attendance' }
+        ];
+    } else if (accessLevel === 'coordinator') {
+        permissions = [
+            { icon: '👀', text: 'View assigned classes' },
+            { icon: '📚', text: 'View teaching subjects' },
+            { icon: '👥', text: 'View and manage students' },
+            { icon: '✅', text: 'Mark attendance' },
+            { icon: '📊', text: 'Generate reports' },
+            { icon: '📝', text: 'Update student records' }
+        ];
+    } else if (accessLevel === 'admin') {
+        permissions = [
+            { icon: '🔐', text: 'Full system access' },
+            { icon: '👥', text: 'Manage all staff' },
+            { icon: '📚', text: 'Manage all classes' },
+            { icon: '📖', text: 'Manage all subjects' },
+            { icon: '🎓', text: 'Manage all students' },
+            { icon: '📊', text: 'Access all reports' }
+        ];
+    }
+    
+    // Add class access permission
+    if (canAccessAllClasses) {
+        permissions.push({ icon: '🌐', text: 'Access to ALL classes' });
+    } else {
+        permissions.push({ icon: '🎯', text: 'Access to assigned classes only' });
+    }
+    
+    // Create permission items
+    permissions.forEach((perm, index) => {
+        const item = document.createElement('div');
+        item.className = 'permission-item';
+        item.style.animationDelay = `${index * 0.05}s`;
+        item.style.animation = 'fadeInUp 0.4s ease-out';
+        
+        item.innerHTML = `
+            <span class="permission-icon">${perm.icon}</span>
+            <span class="permission-text">${perm.text}</span>
+        `;
+        
+        container.appendChild(item);
+    });
 }
 
-function viewSchedule() {
-    showSuccess('Schedule feature coming soon');
+// ===============================
+// UTILITY FUNCTIONS
+// ===============================
+
+function safeDisplay(elementId, value, fallback = '-') {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = value ?? fallback;
+        element.style.animation = 'fadeIn 0.4s ease-out';
+    }
 }
 
-function viewAllStaff() {
-    showSuccess('Staff directory coming soon');
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.warn('No authentication token found');
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
 }
+
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('loginId');
+        localStorage.removeItem('institutionCode');
+        window.location.href = 'index.html';
+    }
+}
+
+// ===============================
+// MESSAGE FUNCTIONS
+// ===============================
+
+function showLoading(message = 'Loading...') {
+    const loadingDiv = document.getElementById('loading');
+    if (loadingDiv) {
+        loadingDiv.textContent = '⏳ ' + message;
+        loadingDiv.classList.add('show');
+    }
+}
+
+function hideLoading() {
+    const loadingDiv = document.getElementById('loading');
+    if (loadingDiv) {
+        loadingDiv.classList.remove('show');
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv) {
+        errorDiv.textContent = '❌ ' + message;
+        errorDiv.classList.add('show');
+        errorDiv.style.animation = 'slideInRight 0.4s ease-out';
+        
+        setTimeout(() => {
+            errorDiv.classList.remove('show');
+        }, 5000);
+    }
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('success-message');
+    if (successDiv) {
+        successDiv.textContent = '✅ ' + message;
+        successDiv.classList.add('show');
+        successDiv.style.animation = 'slideInRight 0.4s ease-out';
+        
+        setTimeout(() => {
+            successDiv.classList.remove('show');
+        }, 3000);
+    }
+}
+
+// ===============================
+// SANITIZATION (from utils.js)
+// ===============================
+
+function sanitizeHTML(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ===============================
+// EXPORT FUNCTIONS
+// ===============================
+
+window.logout = logout;
+
+console.log('✅ Staff-Dashboard.js loaded successfully');

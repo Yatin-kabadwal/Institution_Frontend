@@ -3,77 +3,559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta name="description" content="Login - Institution Management System by Team H2O">
+    <title>Login | Institution Management System</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css"></head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* Login Page Specific Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
 
+        #login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-primary);
+            padding: var(--space-6);
+            position: relative;
+            overflow: hidden;
+        }
 
+        /* Animated Background */
+        #login-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(6, 182, 212, 0.2) 0%, transparent 50%);
+            animation: meshMove 15s ease-in-out infinite;
+        }
+
+        @keyframes meshMove {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(20px, -20px); }
+            66% { transform: translate(-20px, 20px); }
+        }
+
+        /* Floating Particles */
+        #login-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent),
+                radial-gradient(1px 1px at 80% 10%, white, transparent);
+            background-size: 200px 200px;
+            animation: floatParticles 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes floatParticles {
+            from { transform: translateY(0); }
+            to { transform: translateY(-200px); }
+        }
+
+        /* Login Card */
+        .login-card {
+            background: var(--white);
+            border-radius: var(--radius-3xl);
+            box-shadow: var(--shadow-2xl);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            animation: fadeInUp 0.8s var(--ease-out);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .login-header {
+            background: var(--gradient-primary);
+            padding: var(--space-10);
+            text-align: center;
+            color: var(--white);
+            position: relative;
+        }
+
+        .login-header h1 {
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-3);
+            color: var(--white);
+            -webkit-text-fill-color: var(--white);
+            background: none;
+            font-weight: 900;
+        }
+
+        .login-header p {
+            opacity: 0.95;
+            font-size: var(--text-base);
+            margin: 0;
+            font-weight: 400;
+        }
+
+        /* Body */
+        .login-body {
+            padding: var(--space-10);
+        }
+
+        /* Login Type Tabs */
+        .login-type-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-2);
+            background: var(--gray-100);
+            padding: var(--space-2);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-inner);
+        }
+
+        .login-type-tabs button {
+            padding: var(--space-4) var(--space-6);
+            background: transparent;
+            color: var(--gray-700);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: var(--text-base);
+            cursor: pointer;
+            transition: all var(--duration-200) var(--ease-out);
+            box-shadow: none;
+            min-height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+        }
+
+        .login-type-tabs button.active {
+            background: var(--white);
+            color: var(--primary-600);
+            box-shadow: var(--shadow-md);
+            font-weight: 700;
+        }
+
+        @media (hover: hover) {
+            .login-type-tabs button:hover:not(.active) {
+                background: rgba(255, 255, 255, 0.5);
+                color: var(--primary-600);
+            }
+        }
+
+        /* Forms */
+        .login-form {
+            display: none;
+        }
+
+        .login-form.active {
+            display: block;
+            animation: fadeIn 0.4s var(--ease-out);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: var(--space-6);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wide);
+        }
+
+        .form-group .required {
+            color: var(--error-500);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon input {
+            padding-left: var(--space-12);
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: var(--space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Button */
+        .btn-login {
+            width: 100%;
+            padding: var(--space-5);
+            background: var(--gradient-primary);
+            color: var(--white);
+            border: none;
+            border-radius: var(--radius-xl);
+            font-weight: 700;
+            font-size: var(--text-lg);
+            cursor: pointer;
+            transition: all var(--duration-300) var(--ease-out);
+            box-shadow: var(--shadow-md);
+            margin-top: var(--space-4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left var(--duration-500) var(--ease-out);
+        }
+
+        @media (hover: hover) {
+            .btn-login:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-xl), var(--shadow-colored);
+            }
+
+            .btn-login:hover::before {
+                left: 100%;
+            }
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        /* Forgot Password */
+        .forgot-password {
+            text-align: right;
+            margin-top: var(--space-2);
+        }
+
+        .forgot-password a {
+            color: var(--primary-600);
+            font-size: var(--text-sm);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color var(--duration-200) var(--ease-out);
+        }
+
+        .forgot-password a:hover {
+            color: var(--primary-700);
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .login-footer {
+            text-align: center;
+            padding: var(--space-6) var(--space-10);
+            border-top: 2px solid var(--gray-100);
+            background: var(--gray-50);
+        }
+
+        .login-footer p {
+            margin: 0;
+            font-size: var(--text-sm);
+            color: var(--gray-600);
+        }
+
+        .login-footer a {
+            color: var(--primary-600);
+            font-weight: 700;
+            text-decoration: none;
+            transition: color var(--duration-200) var(--ease-out);
+        }
+
+        .login-footer a:hover {
+            color: var(--primary-700);
+            text-decoration: underline;
+        }
+
+        /* Messages */
+        .message-box {
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-6);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    display: none !important;  /* ← Add !important */
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.message-box.show {
+    display: flex !important;  /* ← Add !important */
+    animation: slideInRight 0.4s var(--ease-bounce);
+}
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message-box.error {
+            background: linear-gradient(135deg, var(--error-50), var(--error-100));
+            color: var(--error-700);
+            border: 2px solid var(--error-500);
+        }
+
+        .message-box.success {
+            background: linear-gradient(135deg, var(--success-50), var(--success-100));
+            color: var(--success-700);
+            border: 2px solid var(--success-500);
+        }
+
+        .message-box.loading {
+            background: linear-gradient(135deg, var(--warning-50), var(--warning-100));
+            color: var(--warning-700);
+            border: 2px solid var(--warning-500);
+        }
+
+        /* Back Link */
+        .back-link {
+            text-align: center;
+            margin-top: var(--space-6);
+            padding-top: var(--space-6);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .back-link a {
+            color: var(--gray-600);
+            font-size: var(--text-sm);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            transition: color var(--duration-200) var(--ease-out);
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            color: var(--primary-600);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 640px) {
+            #login-container {
+                padding: var(--space-4);
+            }
+
+            .login-card {
+                border-radius: var(--radius-2xl);
+            }
+
+            .login-header {
+                padding: var(--space-8);
+            }
+
+            .login-header h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .login-body {
+                padding: var(--space-6);
+            }
+
+            .login-footer {
+                padding: var(--space-5) var(--space-6);
+            }
+
+            .login-type-tabs button {
+                font-size: var(--text-sm);
+                padding: var(--space-3) var(--space-4);
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="login-container">
-        <h1>Login to Institution Management System</h1>
-        
-        <div id="loading" style="display:none;">Loading...</div>
-        <div id="error-message" style="display:none; color:red;"></div>
-        <div id="success-message" style="display:none; color:green;"></div>
-        
-        <!-- Login Type Selector -->
-        <div id="login-type-selector">
-            <h3>Select Login Type:</h3>
-            <button onclick="showInstitutionLogin()" id="institution-btn">Institution Login</button>
-            <button onclick="showStaffLogin()" id="staff-btn">Staff Login</button>
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <h1>🎓 Welcome Back</h1>
+                <p>Sign in to continue to your dashboard</p>
+            </div>
+
+            <!-- Body -->
+            <div class="login-body">
+                <!-- Messages -->
+                <!-- Messages (HIDDEN BY DEFAULT) -->
+<div id="loading" class="message-box loading" style="display: none;">
+    ⏳ Loading...
+</div>
+<div id="error-message" class="message-box error" style="display: none;">
+    ❌ Error message here
+</div>
+<div id="success-message" class="message-box success" style="display: none;">
+    ✅ Success message here
+</div>
+
+                <!-- Login Type Tabs -->
+                <div class="login-type-tabs">
+                    <button onclick="showInstitutionLogin()" id="institution-btn" class="active">
+                        <span>🏛️</span>
+                        <span>Institution</span>
+                    </button>
+                    <button onclick="showStaffLogin()" id="staff-btn">
+                        <span>👨‍🏫</span>
+                        <span>Staff</span>
+                    </button>
+                </div>
+
+                <!-- Institution Login Form -->
+                <form id="institution-login-form" class="login-form active">
+                    <div class="form-group">
+                        <label for="inst-code">
+                            Institution Code <span class="required">*</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🏫</span>
+                            <input 
+                                type="text" 
+                                id="inst-code" 
+                                placeholder="Enter your institution code"
+                                required
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inst-password">
+                            Password <span class="required">*</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input 
+                                type="password" 
+                                id="inst-password" 
+                                placeholder="Enter your password"
+                                required
+                                autocomplete="current-password"
+                            >
+                        </div>
+                        <div class="forgot-password">
+                            <a href="forgot-password.html">Forgot password?</a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        Sign In as Institution
+                    </button>
+                </form>
+
+                <!-- Staff Login Form -->
+                <form id="staff-login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="staff-loginid">
+                            Login ID (Mobile) <span class="required">*</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📱</span>
+                            <input 
+                                type="tel" 
+                                id="staff-loginid" 
+                                placeholder="Enter 10-digit mobile number"
+                                maxlength="10"
+                                required
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="staff-password">
+                            Password <span class="required">*</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">🔒</span>
+                            <input 
+                                type="password" 
+                                id="staff-password" 
+                                placeholder="Enter your password"
+                                required
+                                autocomplete="current-password"
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        Sign In as Staff
+                    </button>
+                </form>
+
+                <!-- Back to Home -->
+                <div class="back-link">
+                    <a href="index.html">
+                        <span>←</span>
+                        <span>Back to Home</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>Don't have an account? <a href="register.html">Register here</a></p>
+            </div>
         </div>
-        
-        <br>
-        
-        <!-- Institution Login Form -->
-        <div id="institution-login-form" style="display:none;">
-            <h2>Institution Login</h2>
-            <form id="institution-form">
-                <div>
-                    <label for="inst-code">Institution Code: *</label>
-                    <input type="text" id="inst-code" required>
-                </div>
-                
-                <div>
-                    <label for="inst-password">Password: *</label>
-                    <input type="password" id="inst-password" required>
-                </div>
-                
-                <br>
-                <button type="submit">Login</button>
-                <button type="button" onclick="window.location.href='forgot-password.html'">Forgot Password?</button>
-            </form>
-        </div>
-        
-        <!-- Staff Login Form -->
-        <div id="staff-login-form" style="display:none;">
-            <h2>Staff Login</h2>
-            <form id="staff-form">
-                <div>
-                    <label for="staff-loginid">Login ID (Mobile No): *</label>
-                    <input type="text" id="staff-loginid" maxlength="10" required>
-                </div>
-                
-                <div>
-                    <label for="staff-password">Password: *</label>
-                    <input type="password" id="staff-password" required>
-                </div>
-                
-                <br>
-                <button type="submit">Login</button>
-            </form>
-        </div>
-        
-        <br>
-        <p>Don't have an account? <a href="register.html">Register here</a></p>
     </div>
 
+    <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/login.js"></script>
 </body>
 </html>

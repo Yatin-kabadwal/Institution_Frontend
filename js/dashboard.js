@@ -1,15 +1,23 @@
-// dashboard.js - SECURE FIXED VERSION WITH PROPER NULL HANDLING
+// dashboard.js - ENHANCED WITH ANIMATIONS & BETTER UX
+
+// ===============================
+// INITIALIZATION
+// ===============================
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard initializing...');
+    
     // Check authentication
     if (!checkAuth()) {
+        console.error('Authentication failed');
         return;
     }
     
     // Verify this is an institution user (not staff)
     const userType = localStorage.getItem('userType');
+    
     if (userType === 'staff') {
-        // Redirect staff to their dashboard
+        console.log('Staff user detected, redirecting to staff dashboard...');
         window.location.href = 'staff-dashboard.html';
         return;
     }
@@ -22,18 +30,25 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
+    console.log('✅ Authentication verified - Institution user');
+    
     // Load dashboard data
     loadDashboardData();
 });
 
+// ===============================
+// MAIN DASHBOARD LOADER
+// ===============================
+
 async function loadDashboardData() {
     try {
-        showLoading('Loading dashboard...');
+        showLoading('Loading your dashboard...');
+        
+        // Show loading skeletons
+        showLoadingSkeletons();
         
         // Fetch institution profile
         const response = await apiGet(API_ENDPOINTS.INSTITUTION_PROFILE, true);
-        
-        hideLoading();
         
         console.log('📊 Dashboard API Response:', response);
         
@@ -47,33 +62,61 @@ async function loadDashboardData() {
             throw new Error('No data received from server');
         }
         
-        // Display logo
+        // Hide loading, show data with animations
+        hideLoading();
+        hideLoadingSkeletons();
+        
+        // Display data with staggered animation
         displayLogo(data.logo);
         
-        // Display profile details with safe null handling
-        displayProfileDetails(data);
+        setTimeout(() => displayProfileDetails(data), 100);
+        setTimeout(() => displayLastLogin(data.lastLogin), 200);
+        setTimeout(() => displayStatistics(data.stats), 300);
         
-        // Display last login
-        displayLastLogin(data.lastLogin);
+        // Animate stats cards
+        animateStatsCards();
         
-        // Display statistics
-        displayStatistics(data.stats);
+        console.log('✅ Dashboard loaded successfully');
         
     } catch (error) {
         hideLoading();
+        hideLoadingSkeletons();
         console.error('❌ Error loading dashboard:', error);
         showError(error.message || 'Failed to load dashboard data');
     }
 }
 
 // ===============================
+// LOADING SKELETONS
+// ===============================
+
+function showLoadingSkeletons() {
+    // Stats cards loading state
+    const statsCards = document.querySelectorAll('.stat-card p');
+    statsCards.forEach(card => {
+        card.classList.add('loading-skeleton');
+        card.textContent = '...';
+    });
+}
+
+function hideLoadingSkeletons() {
+    const statsCards = document.querySelectorAll('.stat-card p');
+    statsCards.forEach(card => {
+        card.classList.remove('loading-skeleton');
+    });
+}
+
+// ===============================
 // DISPLAY LOGO
 // ===============================
+
 function displayLogo(logo) {
     const logoImg = document.getElementById('institution-logo');
     if (logo && logoImg) {
         logoImg.src = logo;
         logoImg.style.display = 'block';
+        logoImg.style.animation = 'fadeInUp 0.6s ease-out';
+        
         logoImg.onerror = function() {
             console.warn('Failed to load logo image');
             this.style.display = 'none';
@@ -82,14 +125,17 @@ function displayLogo(logo) {
 }
 
 // ===============================
-// DISPLAY PROFILE DETAILS - SAFE NULL HANDLING
+// DISPLAY PROFILE DETAILS
 // ===============================
+
 function displayProfileDetails(data) {
     // Helper function for safe display
     const safeDisplay = (elementId, value, fallback = '-') => {
         const element = document.getElementById(elementId);
         if (element) {
             element.textContent = value ?? fallback;
+            // Add fade-in animation
+            element.style.animation = 'fadeIn 0.4s ease-out';
         }
     };
 
@@ -103,29 +149,11 @@ function displayProfileDetails(data) {
         safeDisplay('inst-state', data.address.state);
         safeDisplay('inst-district', data.address.district);
         safeDisplay('inst-city', data.address.city);
-        
-        // Handle location if element exists
-        const locationElement = document.getElementById('inst-location');
-        if (locationElement) {
-            safeDisplay('inst-location', data.address.location);
-        }
     } else {
-        // Address is null/undefined or invalid format
         console.warn('⚠️ Address data is missing or invalid:', data.address);
         safeDisplay('inst-state', null);
         safeDisplay('inst-district', null);
         safeDisplay('inst-city', null);
-        
-        // Show warning to user
-        const addressWarning = document.createElement('p');
-        addressWarning.style.color = '#f59e0b';
-        addressWarning.style.fontStyle = 'italic';
-        addressWarning.textContent = '⚠️ Address information is incomplete. Please update your profile.';
-        
-        const profileDetails = document.getElementById('profile-details');
-        if (profileDetails) {
-            profileDetails.insertBefore(addressWarning, profileDetails.firstChild);
-        }
     }
     
     // Contacts - Handle all possible null/undefined cases
@@ -134,32 +162,17 @@ function displayProfileDetails(data) {
         safeDisplay('inst-mobile2', data.contacts.mobile2);
         safeDisplay('inst-email', data.contacts.email);
     } else {
-        // Contacts is null/undefined or invalid format
         console.warn('⚠️ Contacts data is missing or invalid:', data.contacts);
         safeDisplay('inst-mobile1', null);
         safeDisplay('inst-mobile2', null);
         safeDisplay('inst-email', null);
-        
-        // Show warning to user
-        const contactsWarning = document.createElement('p');
-        contactsWarning.style.color = '#f59e0b';
-        contactsWarning.style.fontStyle = 'italic';
-        contactsWarning.textContent = '⚠️ Contact information is incomplete. Please update your profile.';
-        
-        const profileDetails = document.getElementById('profile-details');
-        if (profileDetails) {
-            const contactsHeading = Array.from(profileDetails.querySelectorAll('h4'))
-                .find(h => h.textContent.includes('Contact'));
-            if (contactsHeading) {
-                contactsHeading.insertAdjacentElement('afterend', contactsWarning);
-            }
-        }
     }
 }
 
 // ===============================
 // DISPLAY LAST LOGIN
 // ===============================
+
 function displayLastLogin(lastLogin) {
     const element = document.getElementById('inst-last-login');
     if (!element) return;
@@ -185,19 +198,25 @@ function displayLastLogin(lastLogin) {
     } else {
         element.textContent = 'First login';
     }
+    
+    // Add fade-in animation
+    element.style.animation = 'fadeIn 0.4s ease-out';
 }
 
 // ===============================
-// DISPLAY STATISTICS - SAFE NULL HANDLING
+// DISPLAY STATISTICS
 // ===============================
+
 function displayStatistics(stats) {
-    // Helper function for safe stat display
+    // Helper function for safe stat display with animation
     const safeStatDisplay = (elementId, value) => {
         const element = document.getElementById(elementId);
         if (element) {
-            // Convert to number and ensure it's not NaN
             const numValue = Number(value);
-            element.textContent = isNaN(numValue) ? '0' : numValue.toString();
+            const finalValue = isNaN(numValue) ? 0 : numValue;
+            
+            // Animate number counting
+            animateValue(element, 0, finalValue, 1000);
         }
     };
 
@@ -207,7 +226,6 @@ function displayStatistics(stats) {
         safeStatDisplay('stat-subjects', stats.totalSubjects);
         safeStatDisplay('stat-students', stats.totalStudents);
     } else {
-        // Stats missing - set all to 0
         console.warn('⚠️ Statistics data is missing');
         safeStatDisplay('stat-staff', 0);
         safeStatDisplay('stat-classes', 0);
@@ -217,16 +235,162 @@ function displayStatistics(stats) {
 }
 
 // ===============================
+// ANIMATE NUMBER COUNTING
+// ===============================
+
+function animateValue(element, start, end, duration) {
+    const range = end - start;
+    const increment = range / (duration / 16); // 60fps
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            current = end;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current).toString();
+    }, 16);
+}
+
+// ===============================
+// ANIMATE STATS CARDS
+// ===============================
+
+function animateStatsCards() {
+    const cards = document.querySelectorAll('.stat-card');
+    
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.animation = 'fadeInUp 0.6s ease-out';
+        }, index * 100);
+    });
+}
+
+// ===============================
 // NAVIGATION FUNCTIONS
 // ===============================
+
 function goToPart1() {
+    console.log('Navigating to Part 1...');
     window.location.href = 'part1-basic-info.html';
 }
 
 function goToPart2() {
+    console.log('Navigating to Part 2...');
     window.location.href = 'part2-mapping.html';
 }
 
 function goToPart3() {
+    console.log('Navigating to Part 3...');
     window.location.href = 'part3-credentials.html';
 }
+
+// ===============================
+// ENHANCED MESSAGE FUNCTIONS
+// ===============================
+
+function showLoading(message = 'Loading...') {
+    const loadingDiv = document.getElementById('loading');
+    if (loadingDiv) {
+        loadingDiv.textContent = '⏳ ' + message;
+        loadingDiv.style.display = 'block';
+        loadingDiv.classList.add('show');
+    }
+}
+
+function hideLoading() {
+    const loadingDiv = document.getElementById('loading');
+    if (loadingDiv) {
+        loadingDiv.style.display = 'none';
+        loadingDiv.classList.remove('show');
+    }
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    if (errorDiv) {
+        errorDiv.textContent = '❌ ' + message;
+        errorDiv.style.display = 'block';
+        errorDiv.classList.add('show');
+        errorDiv.style.animation = 'slideInRight 0.4s ease-out';
+        
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+            errorDiv.classList.remove('show');
+        }, 5000);
+    }
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('success-message');
+    if (successDiv) {
+        successDiv.textContent = '✅ ' + message;
+        successDiv.style.display = 'block';
+        successDiv.classList.add('show');
+        successDiv.style.animation = 'slideInRight 0.4s ease-out';
+        
+        setTimeout(() => {
+            successDiv.style.display = 'none';
+            successDiv.classList.remove('show');
+        }, 3000);
+    }
+}
+
+// ===============================
+// UTILITY FUNCTIONS
+// ===============================
+
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        console.warn('No authentication token found');
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userType');
+        localStorage.removeItem('institutionCode');
+        window.location.href = 'index.html';
+    }
+}
+
+// ===============================
+// KEYBOARD SHORTCUTS
+// ===============================
+
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + 1 = Part 1
+    if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+        e.preventDefault();
+        goToPart1();
+    }
+    
+    // Ctrl/Cmd + 2 = Part 2
+    if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+        e.preventDefault();
+        goToPart2();
+    }
+    
+    // Ctrl/Cmd + 3 = Part 3
+    if ((e.ctrlKey || e.metaKey) && e.key === '3') {
+        e.preventDefault();
+        goToPart3();
+    }
+});
+
+// ===============================
+// EXPORT FUNCTIONS
+// ===============================
+
+window.goToPart1 = goToPart1;
+window.goToPart2 = goToPart2;
+window.goToPart3 = goToPart3;
+window.logout = logout;
+
+console.log('✅ Dashboard.js loaded successfully');

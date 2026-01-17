@@ -534,9 +534,10 @@ function displayStudents() {
     const tbody = document.querySelector('#students-table tbody');
     tbody.innerHTML = '';
     
-    studentsData.forEach(student => {
+    studentsData.forEach((student, index) => {  // Add index
         const row = tbody.insertRow();
         row.innerHTML = `
+            <td>${index + 1}</td>  <!-- Add serial number -->
             <td>${student.name}</td>
             <td>${student.fatherName}</td>
             <td>${student.classId?.className || '-'}</td>
@@ -547,6 +548,12 @@ function displayStudents() {
             </td>
         `;
     });
+    
+    // ✅ ADD THIS: Update student count
+    const countDiv = document.getElementById('student-count');
+    if (countDiv) {
+        countDiv.innerHTML = `Total: <strong>${studentsData.length}</strong>`;
+    }
 }
 
 async function handleAddStudent(e) {

@@ -3,142 +3,704 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Staff Dashboard - Institution Management System by Team H2O">
-    <title>Staff Dashboard | IMS</title>
+    <meta name="description" content="Staff Dashboard - IMS by Team H2O">
+    <title>Staff Dashboard | Institution Management System</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* Staff Dashboard Specific Styles */
+        body {
+            background: var(--gray-50);
+        }
+
+        #staff-dashboard-container {
+            min-height: 100vh;
+            padding-bottom: var(--space-10);
+        }
+
+        /* Enhanced Header */
+        #header {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: var(--space-6) var(--space-8);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            background: none;
+            -webkit-text-fill-color: var(--white);
+            font-weight: 800;
+        }
+
+        #header button {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all var(--duration-200) var(--ease-out);
+            backdrop-filter: blur(10px);
+        }
+
+        #header button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+
+        /* Messages */
+        #loading,
+        #error-message,
+        #success-message {
+            display: none !important;
+            margin: var(--space-6) 0;
+        }
+
+        #loading.show,
+        #error-message.show,
+        #success-message.show {
+            display: block !important;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, var(--primary-600), var(--secondary-600));
+            color: var(--white);
+            padding: var(--space-10);
+            border-radius: var(--radius-3xl);
+            margin: var(--space-8) 0;
+            box-shadow: var(--shadow-2xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '👋';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            font-size: 200px;
+            opacity: 0.1;
+        }
+
+        .welcome-banner h2 {
+            font-size: var(--text-4xl);
+            margin-bottom: var(--space-2);
+            position: relative;
+            z-index: 1;
+            color: var(--white);
+            background: none;
+            -webkit-text-fill-color: var(--white);
+        }
+
+        .welcome-banner p {
+            font-size: var(--text-lg);
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            margin: 0;
+        }
+
+        /* Profile Section */
+        #profile-section {
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+            border-radius: var(--radius-3xl);
+            padding: var(--space-10);
+            box-shadow: var(--shadow-lg);
+            margin: var(--space-8) 0;
+            border: 2px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #profile-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, var(--info-100) 0%, transparent 70%);
+            opacity: 0.5;
+        }
+
+        #profile-section h3 {
+            position: relative;
+            z-index: 1;
+            margin-bottom: var(--space-6);
+            color: var(--gray-900);
+            font-size: var(--text-2xl);
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--primary-200);
+        }
+
+        #profile-details {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-4);
+        }
+
+        #profile-details p {
+            background: var(--white);
+            padding: var(--space-5);
+            border-radius: var(--radius-xl);
+            border-left: 4px solid var(--info-600);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--duration-200) var(--ease-out);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+        }
+
+        #profile-details p:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-md);
+            border-left-width: 6px;
+        }
+
+        #profile-details strong {
+            color: var(--gray-700);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wide);
+        }
+
+        #profile-details span {
+            color: var(--gray-900);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Access Level Badge */
+        .access-badge {
+            display: inline-block;
+            padding: var(--space-2) var(--space-5);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .access-teacher {
+            background: var(--info-100);
+            color: var(--info-700);
+        }
+
+        .access-coordinator {
+            background: var(--warning-100);
+            color: var(--warning-700);
+        }
+
+        .access-admin {
+            background: var(--error-100);
+            color: var(--error-700);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: var(--space-2) var(--space-5);
+            border-radius: var(--radius-full);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: var(--success-100);
+            color: var(--success-700);
+        }
+
+        .status-inactive {
+            background: var(--error-100);
+            color: var(--error-700);
+        }
+
+        /* Assigned Classes Section */
+        #classes-section,
+        #subjects-section {
+            background: var(--white);
+            border-radius: var(--radius-3xl);
+            padding: var(--space-10);
+            box-shadow: var(--shadow-lg);
+            margin: var(--space-8) 0;
+            border: 2px solid var(--gray-200);
+        }
+
+        #classes-section h3,
+        #subjects-section h3 {
+            margin-bottom: var(--space-6);
+            color: var(--gray-900);
+            font-size: var(--text-2xl);
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--primary-200);
+        }
+
+        .class-grid,
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .class-card,
+        .subject-card {
+            background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));
+            padding: var(--space-6);
+            border-radius: var(--radius-2xl);
+            text-align: center;
+            border: 2px solid var(--primary-300);
+            transition: all var(--duration-300) var(--ease-out);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .class-card::before {
+            content: '📚';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 80px;
+            opacity: 0.1;
+        }
+
+        .subject-card::before {
+            content: '📖';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 80px;
+            opacity: 0.1;
+        }
+
+        .class-card:hover,
+        .subject-card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-500);
+        }
+
+        .class-card h4,
+        .subject-card h4 {
+            font-size: var(--text-xl);
+            color: var(--primary-700);
+            margin: 0;
+            position: relative;
+            z-index: 1;
+            font-weight: 800;
+        }
+
+        .class-card p,
+        .subject-card p {
+            margin-top: var(--space-2);
+            color: var(--gray-600);
+            font-size: var(--text-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Quick Actions */
+        #quick-actions {
+            background: var(--white);
+            border-radius: var(--radius-3xl);
+            padding: var(--space-10);
+            box-shadow: var(--shadow-lg);
+            margin: var(--space-8) 0;
+            border: 2px solid var(--gray-200);
+        }
+
+        #quick-actions h3 {
+            margin-bottom: var(--space-8);
+            color: var(--gray-900);
+            font-size: var(--text-2xl);
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--primary-200);
+            text-align: center;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, var(--white), var(--gray-50));
+            padding: var(--space-8);
+            border-radius: var(--radius-2xl);
+            border: 2px solid var(--gray-200);
+            text-align: center;
+            transition: all var(--duration-300) var(--ease-out);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform var(--duration-300) var(--ease-out);
+        }
+
+        .action-card:hover {
+            border-color: var(--primary-500);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .action-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-4);
+            display: block;
+        }
+
+        .action-card h4 {
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-2);
+            color: var(--primary-700);
+            font-weight: 700;
+        }
+
+        .action-card p {
+            color: var(--gray-600);
+            font-size: var(--text-sm);
+            margin: 0;
+        }
+
+        /* Permissions Section */
+        #permissions-section {
+            background: linear-gradient(135deg, var(--success-50), var(--success-100));
+            border-radius: var(--radius-3xl);
+            padding: var(--space-10);
+            box-shadow: var(--shadow-lg);
+            margin: var(--space-8) 0;
+            border: 2px solid var(--success-300);
+        }
+
+        #permissions-section h3 {
+            margin-bottom: var(--space-6);
+            color: var(--success-900);
+            font-size: var(--text-2xl);
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--success-400);
+        }
+
+        .permission-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .permission-item {
+            background: var(--white);
+            padding: var(--space-5);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--success-200);
+        }
+
+        .permission-icon {
+            font-size: var(--text-2xl);
+            flex-shrink: 0;
+        }
+
+        .permission-text {
+            font-weight: 600;
+            color: var(--success-800);
+            font-size: var(--text-sm);
+        }
+
+        /* Institution Info */
+        #institution-info {
+            background: linear-gradient(135deg, var(--info-50), var(--info-100));
+            border-radius: var(--radius-2xl);
+            padding: var(--space-6);
+            margin: var(--space-8) 0;
+            border-left: 5px solid var(--info-500);
+        }
+
+        #institution-info h4 {
+            margin: 0 0 var(--space-3) 0;
+            color: var(--info-900);
+            font-size: var(--text-lg);
+        }
+
+        #institution-info p {
+            margin: 0;
+            color: var(--info-800);
+            font-size: var(--text-sm);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-10);
+            color: var(--gray-500);
+        }
+
+        .empty-state p {
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-2);
+        }
+
+        .empty-state small {
+            color: var(--gray-400);
+        }
+
+        /* Footer */
+        .powered-by {
+            text-align: center;
+            margin-top: var(--space-16);
+            padding: var(--space-8);
+            color: var(--gray-500);
+            font-size: var(--text-sm);
+        }
+
+        .powered-by strong {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            font-size: var(--text-lg);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            #header {
+                flex-direction: column;
+                text-align: center;
+                padding: var(--space-5);
+            }
+
+            .welcome-banner {
+                padding: var(--space-8);
+            }
+
+            #profile-section,
+            #classes-section,
+            #subjects-section,
+            #quick-actions,
+            #permissions-section {
+                padding: var(--space-6);
+            }
+
+            #profile-details {
+                grid-template-columns: 1fr;
+            }
+
+            .class-grid,
+            .subject-grid,
+            .actions-grid,
+            .permission-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--gray-200) 25%, var(--gray-100) 50%, var(--gray-200) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-lg);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
 </head>
 <body>
     <div id="staff-dashboard-container">
         <!-- Header -->
         <div id="header">
-            <div>
-                <h1>👨‍🏫 Staff Dashboard</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Welcome back, <span id="staff-name-header">Staff Member</span></p>
-            </div>
+            <h1>👨‍🏫 Staff Dashboard</h1>
             <button onclick="logout()">Logout</button>
         </div>
-        
-        <!-- Messages -->
-        <div id="loading" style="display:none;">Loading...</div>
-        <div id="error-message" style="display:none;"></div>
-        <div id="success-message" style="display:none;"></div>
-        
-        <!-- Staff Profile Section -->
-        <div id="staff-profile-section" class="card">
-            <h2>Your Profile</h2>
-            
-            <div id="staff-profile-details">
-                <p><strong>Name:</strong> <span id="staff-name">-</span></p>
-                <p><strong>Mobile Number:</strong> <span id="staff-mobile">-</span></p>
-                <p><strong>Login ID:</strong> <span id="staff-login-id">-</span></p>
-                <p><strong>Designation:</strong> <span id="staff-designation">-</span></p>
-                <p><strong>Access Level:</strong> <span id="staff-access-level">-</span></p>
-                <p><strong>Account Status:</strong> <span id="staff-status">-</span></p>
-                <p><strong>Last Login:</strong> <span id="staff-last-login">-</span></p>
+
+        <div class="container">
+            <!-- Messages -->
+            <div id="loading" style="display:none;">⏳ Loading dashboard...</div>
+            <div id="error-message" style="display:none;"></div>
+            <div id="success-message" style="display:none;"></div>
+
+            <!-- Welcome Banner -->
+            <div class="welcome-banner animate-in">
+                <h2>Welcome, <span id="staff-name-display">Staff Member</span>!</h2>
+                <p>Access your classes, subjects, and manage your teaching activities</p>
             </div>
-        </div>
-        
-        <hr>
-        
-        <!-- Access Information Section -->
-        <div id="access-section">
-            <h2>Your Access & Permissions</h2>
-            
-            <div id="access-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
-                <!-- Assigned Classes Card -->
-                <div class="card">
-                    <h3>📚 Assigned Classes</h3>
-                    <div id="assigned-classes-list">
-                        <p>Loading...</p>
-                    </div>
-                </div>
-                
-                <!-- Teaching Subjects Card (for teachers) -->
-                <div class="card" id="teaching-subjects-card" style="display:none;">
-                    <h3>📖 Teaching Subjects</h3>
-                    <div id="teaching-subjects-list">
-                        <p>Loading...</p>
-                    </div>
-                </div>
-                
-                <!-- Permissions Card -->
-                <div class="card">
-                    <h3>🔐 Permissions</h3>
-                    <div id="permissions-list">
-                        <p>Loading...</p>
-                    </div>
+
+            <!-- Institution Info -->
+            <div id="institution-info">
+                <h4>🏫 <span id="inst-name-display">Loading...</span></h4>
+                <p>Institution Code: <strong id="inst-code-display">-</strong></p>
+            </div>
+
+            <!-- Staff Profile Section -->
+            <div id="profile-section" class="animate-in" style="animation-delay: 0.1s;">
+                <h3>📋 Your Profile</h3>
+
+                <div id="profile-details">
+                    <p>
+                        <strong>Staff Name:</strong>
+                        <span id="staff-name">-</span>
+                    </p>
+                    <p>
+                        <strong>Mobile Number:</strong>
+                        <span id="staff-mobile">-</span>
+                    </p>
+                    <p>
+                        <strong>Login ID:</strong>
+                        <span id="staff-loginid">-</span>
+                    </p>
+                    <p>
+                        <strong>Designation:</strong>
+                        <span id="staff-designation">-</span>
+                    </p>
+                    <p>
+                        <strong>Access Level:</strong>
+                        <span id="staff-access-level">-</span>
+                    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        <span id="staff-status">-</span>
+                    </p>
                 </div>
             </div>
-        </div>
-        
-        <hr>
-        
-        <!-- Quick Actions Section -->
-        <div id="quick-actions-section">
-            <h2>Quick Actions</h2>
-            
-            <div id="action-buttons">
-                <!-- Attendance Button (for teachers) -->
-                <button class="action-card" id="attendance-btn" onclick="goToAttendance()" style="display:none;">
-                    <h3>📝 Take Attendance</h3>
-                    <p>Mark student attendance for your classes</p>
-                    <small>Available for your assigned subjects</small>
-                </button>
-                
-                <!-- View Students Button -->
-                <button class="action-card" onclick="viewStudents()">
-                    <h3>👥 View Students</h3>
-                    <p>See students in your assigned classes</p>
-                    <small>Access student information</small>
-                </button>
-                
-                <!-- View Class Schedule Button (if coordinator/admin) -->
-                <button class="action-card" id="schedule-btn" onclick="viewSchedule()" style="display:none;">
-                    <h3>📅 Class Schedule</h3>
-                    <p>View and manage class schedules</p>
-                    <small>Coordinator/Admin access</small>
-                </button>
-                
-                <!-- View All Staff Button (if admin) -->
-                <button class="action-card" id="view-staff-btn" onclick="viewAllStaff()" style="display:none;">
-                    <h3>👔 View Staff</h3>
-                    <p>Access staff directory and information</p>
-                    <small>Admin access only</small>
-                </button>
+
+            <!-- Assigned Classes Section -->
+            <div id="classes-section" class="animate-in" style="animation-delay: 0.2s;">
+                <h3>📚 Your Assigned Classes</h3>
+                <div id="classes-list" class="class-grid">
+                    <div class="empty-state">
+                        <p>📭 No classes assigned yet</p>
+                        <small>Classes will appear here once assigned by admin</small>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <hr>
-        
-        <!-- Institution Information -->
-        <div id="institution-info-section" class="card">
-            <h2>Institution Information</h2>
-            <div id="institution-details">
-                <p><strong>Institution Name:</strong> <span id="inst-name">-</span></p>
-                <p><strong>Institution Type:</strong> <span id="inst-type">-</span></p>
-                <p><strong>Institution Code:</strong> <span id="inst-code">-</span></p>
+
+            <!-- Teaching Subjects Section (for teachers) -->
+            <div id="subjects-section" class="animate-in" style="animation-delay: 0.3s; display:none;">
+                <h3>📖 Subjects You Teach</h3>
+                <div id="subjects-list" class="subject-grid">
+                    <div class="empty-state">
+                        <p>📭 No subjects assigned yet</p>
+                        <small>Subjects will appear here once assigned by admin</small>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="powered-by" style="margin-top: 3rem;">
-            <p>Powered by <strong>Team H2O</strong></p>
-            <p style="font-size: 0.75rem; opacity: 0.8;">Institution Management System</p>
+
+            <!-- Permissions Section -->
+            <div id="permissions-section" class="animate-in" style="animation-delay: 0.4s;">
+                <h3>✅ Your Permissions</h3>
+                <div id="permissions-list" class="permission-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div id="quick-actions" class="animate-in" style="animation-delay: 0.5s;">
+                <h3>⚡ Quick Actions</h3>
+
+                <div class="actions-grid">
+                    <div class="action-card" onclick="alert('Attendance feature coming soon!')">
+                        <span class="action-icon">✅</span>
+                        <h4>Mark Attendance</h4>
+                        <p>Take attendance for your classes</p>
+                    </div>
+
+                    <div class="action-card" onclick="alert('View Students feature coming soon!')">
+                        <span class="action-icon">👥</span>
+                        <h4>View Students</h4>
+                        <p>See all students in your classes</p>
+                    </div>
+
+                    <div class="action-card" onclick="alert('Schedule feature coming soon!')">
+                        <span class="action-icon">📅</span>
+                        <h4>My Schedule</h4>
+                        <p>View your teaching schedule</p>
+                    </div>
+
+                    <div class="action-card" onclick="alert('Staff Directory feature coming soon!')">
+                        <span class="action-icon">📇</span>
+                        <h4>Staff Directory</h4>
+                        <p>View all staff members</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="powered-by">
+                <p>Powered by <strong>Team H2O</strong></p>
+                <p style="font-size: 0.75rem; opacity: 0.8;">Institution Management System</p>
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-<script src="js/api.js"></script>
-<script src="js/config.js"></script>
-
+    <script src="js/api.js"></script>
     <script src="js/staff-dashboard.js"></script>
 </body>
 </html>

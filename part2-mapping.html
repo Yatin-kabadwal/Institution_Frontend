@@ -3,167 +3,679 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Part 2 - Mapping</title>
-     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <title>Part 2 - Mapping | IMS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css"></head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* Part 2 Specific Styles */
+        body {
+            background: var(--gray-50);
+        }
 
+        #part2-container {
+            min-height: 100vh;
+            padding-bottom: var(--space-10);
+        }
 
+        /* Enhanced Header */
+        #header {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: var(--space-6) var(--space-8);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-sticky);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            background: none;
+            -webkit-text-fill-color: var(--white);
+            font-weight: 800;
+        }
+
+        #header > div {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        #header button {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all var(--duration-200) var(--ease-out);
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+        }
+
+        #header button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-6);
+        }
+
+        /* Messages */
+        #loading,
+        #error-message,
+        #success-message {
+            display: none !important;
+            margin: var(--space-6) 0;
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+        }
+
+        #loading.show { display: block !important; background: var(--warning-50); color: var(--warning-700); border: 2px solid var(--warning-500); }
+        #error-message.show { display: block !important; background: var(--error-50); color: var(--error-700); border: 2px solid var(--error-500); }
+        #success-message.show { display: block !important; background: var(--success-50); color: var(--success-700); border: 2px solid var(--success-500); }
+
+        /* Section Tabs - Enhanced */
+        #section-tabs {
+            display: flex;
+            gap: var(--space-3);
+            background: var(--white);
+            padding: var(--space-4);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+            margin: var(--space-8) 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 2px solid var(--gray-200);
+        }
+
+        #section-tabs button {
+            flex: 1;
+            min-width: 200px;
+            padding: var(--space-5) var(--space-6);
+            background: var(--gray-100);
+            color: var(--gray-700);
+            border: 2px solid transparent;
+            border-radius: var(--radius-xl);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            transition: all var(--duration-300) var(--ease-out);
+            cursor: pointer;
+            position: relative;
+            text-align: center;
+        }
+
+        #section-tabs button::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 4px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-full);
+            transition: transform var(--duration-300) var(--ease-out);
+        }
+
+        #section-tabs button:hover {
+            background: var(--primary-100);
+            color: var(--primary-700);
+            transform: translateY(-4px);
+        }
+
+        #section-tabs button[style*="font-weight: bold"],
+        #section-tabs button.active {
+            background: var(--gradient-primary);
+            color: var(--white);
+            box-shadow: var(--shadow-md);
+        }
+
+        #section-tabs button[style*="font-weight: bold"]::before,
+        #section-tabs button.active::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        /* Mapping Section Container */
+        .mapping-section {
+            display: none;
+            background: var(--white);
+            border-radius: var(--radius-3xl);
+            padding: var(--space-10);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--space-8);
+            border: 2px solid var(--gray-200);
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .mapping-section h2 {
+            color: var(--gray-900);
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .mapping-section > p {
+            color: var(--gray-600);
+            margin-bottom: var(--space-8);
+            font-size: var(--text-base);
+            font-style: italic;
+        }
+
+        .mapping-section h3 {
+            color: var(--primary-700);
+            font-size: var(--text-xl);
+            margin: var(--space-8) 0 var(--space-4) 0;
+            padding-bottom: var(--space-3);
+            border-bottom: 3px solid var(--primary-200);
+        }
+
+        /* Visual Mapping Indicator */
+        .mapping-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-6);
+            padding: var(--space-8);
+            background: linear-gradient(135deg, var(--primary-50), var(--secondary-50));
+            border-radius: var(--radius-2xl);
+            margin: var(--space-6) 0;
+            border: 2px dashed var(--primary-300);
+        }
+
+        .mapping-item {
+            background: var(--white);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            min-width: 150px;
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary-700);
+            border: 2px solid var(--primary-400);
+        }
+
+        .mapping-arrow {
+            font-size: var(--text-4xl);
+            color: var(--primary-600);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        /* Enhanced Forms */
+        form {
+            background: var(--gray-50);
+            padding: var(--space-8);
+            border-radius: var(--radius-2xl);
+            border: 2px solid var(--gray-200);
+            margin-bottom: var(--space-8);
+            transition: all var(--duration-300) var(--ease-out);
+        }
+
+        form:hover {
+            border-color: var(--primary-300);
+            box-shadow: var(--shadow-md);
+        }
+
+        form > div {
+            margin-bottom: var(--space-6);
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            font-size: var(--text-sm);
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wide);
+        }
+
+        select {
+            width: 100%;
+            padding: var(--space-4) var(--space-6);
+            font-size: var(--text-base);
+            font-family: inherit;
+            color: var(--gray-900);
+            background: var(--white);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            transition: all var(--duration-200) var(--ease-out);
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-600);
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+
+        /* Checkbox Section */
+        .checkbox-container {
+            background: var(--white);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            border: 2px solid var(--gray-300);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            margin-bottom: var(--space-2);
+            border-radius: var(--radius-md);
+            transition: all var(--duration-150) var(--ease-out);
+            text-transform: none;
+            font-weight: 500;
+            letter-spacing: normal;
+            cursor: pointer;
+        }
+
+        .checkbox-container label:hover {
+            background: var(--primary-50);
+            color: var(--primary-700);
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary-600);
+        }
+
+        /* All/Select All Checkbox */
+        .select-all-checkbox {
+            background: var(--primary-100);
+            border: 2px solid var(--primary-400);
+            font-weight: 700;
+            color: var(--primary-800);
+        }
+
+        .select-all-checkbox:hover {
+            background: var(--primary-200);
+        }
+
+        /* Enhanced Tables */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: var(--space-8) 0;
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            min-width: 700px;
+            background: var(--white);
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead {
+            background: var(--gradient-primary);
+            color: var(--white);
+            position: sticky;
+            top: 0;
+            z-index: var(--z-10);
+        }
+
+        thead th {
+            padding: var(--space-5) var(--space-6);
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-wider);
+            font-size: var(--text-sm);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--gray-200);
+            transition: all var(--duration-200) var(--ease-out);
+        }
+
+        tbody tr:hover {
+            background: var(--primary-50);
+            transform: scale(1.01);
+            box-shadow: var(--shadow-sm);
+        }
+
+        tbody td {
+            padding: var(--space-5) var(--space-6);
+            color: var(--gray-700);
+            font-size: var(--text-sm);
+        }
+
+        tbody td button {
+            padding: var(--space-2) var(--space-4);
+            font-size: var(--text-xs);
+            margin: 0 var(--space-1);
+            min-height: auto;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, var(--info-50), var(--info-100));
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            border-left: 4px solid var(--info-500);
+            margin: var(--space-6) 0;
+            color: var(--info-900);
+            font-size: var(--text-sm);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-size: var(--text-base);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #header {
+                flex-direction: column;
+                text-align: center;
+                padding: var(--space-5);
+            }
+
+            #section-tabs {
+                flex-direction: column;
+            }
+
+            #section-tabs button {
+                min-width: auto;
+            }
+
+            .mapping-visual {
+                flex-direction: column;
+            }
+
+            .mapping-section {
+                padding: var(--space-6);
+            }
+
+            form {
+                padding: var(--space-6);
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Conditional Display Helper */
+        #ts-subjects-container {
+            display: none;
+            margin-top: var(--space-6);
+        }
+
+        #ts-subjects-container.show {
+            display: block;
+            animation: fadeInUp 0.3s ease-out;
+        }
+    </style>
 </head>
 <body>
     <div id="part2-container">
+        <!-- Header -->
         <div id="header">
-            <h1>PART 2: Mapping of Information</h1>
-            <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
-            <button onclick="logout()">Logout</button>
+            <h1>🔗 PART 2: Mapping & Assignments</h1>
+            <div>
+                <button onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+                <button onclick="logout()">Logout</button>
+            </div>
         </div>
-        
-        <div id="loading" style="display:none;">Loading...</div>
-        <div id="error-message" style="display:none; color:red;"></div>
-        <div id="success-message" style="display:none; color:green;"></div>
-        
-        <!-- Section Navigation -->
-        <div id="section-tabs">
-            <button onclick="showMappingSection('staff-class')" id="tab-staff-class">1. Assign Staff to Classes</button>
-            <button onclick="showMappingSection('class-subject')" id="tab-class-subject">2. Assign Subjects to Classes</button>
-            <button onclick="showMappingSection('teacher-subject')" id="tab-teacher-subject">3. Assign Teachers to Subjects</button>
-        </div>
-        
-        <hr>
-        
-        <!-- 1. ASSIGN STAFF TO CLASSES -->
-        <div id="section-staff-class" class="mapping-section" style="display:none;">
-            <h2>Assign Designation & Classes to Staff</h2>
-            <p><em>(Except Class Teacher - assign designation and which classes they can access)</em></p>
-            
-            <h3>Assign Staff Member</h3>
-            <form id="assign-staff-class-form">
-                <div>
-                    <label for="sc-staff-name">Name: *</label>
-                    <select id="sc-staff-name" required></select>
+
+        <div class="container">
+            <!-- Messages -->
+            <div id="loading" style="display:none;">⏳ Loading...</div>
+            <div id="error-message" style="display:none;"></div>
+            <div id="success-message" style="display:none;"></div>
+
+            <!-- Section Navigation -->
+            <div id="section-tabs">
+                <button onclick="showMappingSection('staff-class')" id="tab-staff-class">
+                    1️⃣ Staff → Classes
+                </button>
+                <button onclick="showMappingSection('class-subject')" id="tab-class-subject">
+                    2️⃣ Classes → Subjects
+                </button>
+                <button onclick="showMappingSection('teacher-subject')" id="tab-teacher-subject">
+                    3️⃣ Teachers → Subjects
+                </button>
+            </div>
+
+            <!-- 1. ASSIGN STAFF TO CLASSES -->
+            <div id="section-staff-class" class="mapping-section" style="display:none;">
+                <h2>👥 Assign Staff to Classes</h2>
+                <p>Assign designation and classes to staff members (except class teachers)</p>
+
+                <!-- Visual Indicator -->
+                <div class="mapping-visual">
+                    <div class="mapping-item">👨‍🏫 Staff</div>
+                    <div class="mapping-arrow">→</div>
+                    <div class="mapping-item">🏆 Designation</div>
+                    <div class="mapping-arrow">→</div>
+                    <div class="mapping-item">📚 Classes</div>
                 </div>
-                
-                <div>
-                    <label for="sc-designation">Designation: *</label>
-                    <select id="sc-designation" required></select>
-                </div>
-                
-                <div>
-                    <label>Assigned Classes:</label>
+
+                <h3>➕ Assign Staff Member</h3>
+                <form id="assign-staff-class-form">
                     <div>
-                        <label>
-                            <input type="checkbox" id="sc-all-classes" onchange="toggleAllClasses(this)">
-                            All Classes
-                        </label>
+                        <label for="sc-staff-name">Staff Name *</label>
+                        <select id="sc-staff-name" required>
+                            <option value="">-- Select Staff --</option>
+                        </select>
                     </div>
-                    <div id="sc-classes-checkboxes"></div>
-                    <p><em>More than one choice should be possible</em></p>
-                </div>
-                
-                <button type="submit">Assign Staff to Classes</button>
-            </form>
-            
-            <h3>Current Assignments</h3>
-            <table id="staff-class-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Staff Name</th>
-                        <th>Designation</th>
-                        <th>Assigned Classes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- 2. ASSIGN SUBJECTS TO CLASSES -->
-        <div id="section-class-subject" class="mapping-section" style="display:none;">
-            <h2>Assign Subjects to Classes</h2>
-            <p><em>(Choose class, then select which subjects are taught in that class)</em></p>
-            
-            <h3>Assign Subjects to a Class</h3>
-            <form id="assign-class-subject-form">
-                <div>
-                    <label for="cs-class">Choose Class: *</label>
-                    <select id="cs-class" required></select>
-                    <p><em>Nick name of class should appear here automatically if created earlier</em></p>
-                </div>
-                
-                <div>
-                    <label>Choose Subjects:</label>
+
                     <div>
-                        <label>
-                            <input type="checkbox" id="cs-all-subjects" onchange="toggleAllSubjects(this)">
-                            All Subjects
-                        </label>
+                        <label for="sc-designation">Designation *</label>
+                        <select id="sc-designation" required>
+                            <option value="">-- Select Designation --</option>
+                        </select>
                     </div>
-                    <div id="cs-subjects-checkboxes"></div>
-                    <p><em>More than one choice should be possible. Option of ALL should be possible.</em></p>
+
+                    <div>
+                        <label>Assigned Classes *</label>
+                        <div class="info-box">
+                            <strong>💡 Tip:</strong>
+                            Select "All Classes" or choose specific classes below
+                        </div>
+                        <div class="checkbox-container">
+                            <label class="select-all-checkbox">
+                                <input type="checkbox" id="sc-all-classes" onchange="toggleAllClasses(this)">
+                                ✅ All Classes
+                            </label>
+                            <div id="sc-classes-checkboxes"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit">Assign Staff to Classes</button>
+                </form>
+
+                <h3>📊 Current Assignments</h3>
+                <div class="table-wrapper">
+                    <table id="staff-class-table">
+                        <thead>
+                            <tr>
+                                <th>Staff Name</th>
+                                <th>Designation</th>
+                                <th>Assigned Classes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                
-                <button type="submit">Assign Subjects to Class</button>
-            </form>
-            
-            <h3>Current Subject Assignments</h3>
-            <table id="class-subject-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Assigned Subjects</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        
-        <!-- 3. ASSIGN TEACHERS TO SUBJECTS -->
-        <div id="section-teacher-subject" class="mapping-section" style="display:none;">
-            <h2>Assign Subject Teachers to Subjects</h2>
-            <p><em>(Choose teacher, then class, then select which subjects they teach)</em></p>
-            
-            <h3>Assign Teacher to Subjects</h3>
-            <form id="assign-teacher-subject-form">
-                <div>
-                    <label for="ts-teacher">Name of Teacher: *</label>
-                    <select id="ts-teacher" required></select>
+            </div>
+
+            <!-- 2. ASSIGN SUBJECTS TO CLASSES -->
+            <div id="section-class-subject" class="mapping-section" style="display:none;">
+                <h2>📖 Assign Subjects to Classes</h2>
+                <p>Choose a class and select which subjects are taught in that class</p>
+
+                <!-- Visual Indicator -->
+                <div class="mapping-visual">
+                    <div class="mapping-item">📚 Class</div>
+                    <div class="mapping-arrow">→</div>
+                    <div class="mapping-item">📖 Subjects</div>
                 </div>
-                
-                <div>
-                    <label for="ts-class">Class: *</label>
-                    <select id="ts-class" required></select>
-                    <p><em>As soon as class is selected, subjects assigned to that class should appear below</em></p>
+
+                <h3>➕ Assign Subjects to a Class</h3>
+                <form id="assign-class-subject-form">
+                    <div>
+                        <label for="cs-class">Choose Class *</label>
+                        <select id="cs-class" required>
+                            <option value="">-- Select Class --</option>
+                        </select>
+                        <small style="display: block; margin-top: var(--space-2); color: var(--gray-600);">
+                            Nick name will appear automatically if created earlier
+                        </small>
+                    </div>
+
+                    <div>
+                        <label>Choose Subjects *</label>
+                        <div class="info-box">
+                            <strong>💡 Tip:</strong>
+                            Select "All Subjects" or choose specific subjects for this class
+                        </div>
+                        <div class="checkbox-container">
+                            <label class="select-all-checkbox">
+                                <input type="checkbox" id="cs-all-subjects" onchange="toggleAllSubjects(this)">
+                                ✅ All Subjects
+                            </label>
+                            <div id="cs-subjects-checkboxes"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit">Assign Subjects to Class</button>
+                </form>
+
+                <h3>📊 Current Subject Assignments</h3>
+                <div class="table-wrapper">
+                    <table id="class-subject-table">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Assigned Subjects</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                
-                <div id="ts-subjects-container" style="display:none;">
-                    <label>Subjects (tick the ones this teacher teaches):</label>
-                    <div id="ts-subjects-checkboxes"></div>
-                    <p><em>Tick more than one box should be possible</em></p>
+            </div>
+
+            <!-- 3. ASSIGN TEACHERS TO SUBJECTS -->
+            <div id="section-teacher-subject" class="mapping-section" style="display:none;">
+                <h2>👨‍🏫 Assign Teachers to Subjects</h2>
+                <p>Choose a teacher, then select class and subjects they teach</p>
+
+                <!-- Visual Indicator -->
+                <div class="mapping-visual">
+                    <div class="mapping-item">👨‍🏫 Teacher</div>
+                    <div class="mapping-arrow">→</div>
+                    <div class="mapping-item">📚 Class</div>
+                    <div class="mapping-arrow">→</div>
+                    <div class="mapping-item">📖 Subjects</div>
                 </div>
-                
-                <button type="submit">Assign Teacher to Subjects</button>
-            </form>
-            
-            <h3>Current Teacher Assignments</h3>
-            <table id="teacher-subject-table" border="1">
-                <thead>
-                    <tr>
-                        <th>Teacher Name</th>
-                        <th>Class</th>
-                        <th>Assigned Subjects</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+
+                <h3>➕ Assign Teacher to Subjects</h3>
+                <form id="assign-teacher-subject-form">
+                    <div>
+                        <label for="ts-teacher">Teacher Name *</label>
+                        <select id="ts-teacher" required>
+                            <option value="">-- Select Teacher --</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="ts-class">Class *</label>
+                        <select id="ts-class" required>
+                            <option value="">-- Select Class --</option>
+                        </select>
+                        <small style="display: block; margin-top: var(--space-2); color: var(--gray-600);">
+                            Subjects assigned to this class will appear below
+                        </small>
+                    </div>
+
+                    <div id="ts-subjects-container">
+                        <label>Subjects (Tick the ones this teacher teaches) *</label>
+                        <div class="info-box">
+                            <strong>💡 Note:</strong>
+                            Only subjects assigned to the selected class will appear here
+                        </div>
+                        <div class="checkbox-container">
+                            <div id="ts-subjects-checkboxes"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit">Assign Teacher to Subjects</button>
+                </form>
+
+                <h3>📊 Current Teacher Assignments</h3>
+                <div class="table-wrapper">
+                    <table id="teacher-subject-table">
+                        <thead>
+                            <tr>
+                                <th>Teacher Name</th>
+                                <th>Class</th>
+                                <th>Assigned Subjects</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/mapping.js"></script>
 </body>
 </html>
