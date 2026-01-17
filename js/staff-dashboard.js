@@ -1,4 +1,4 @@
-// staff-dashboard.js - ENHANCED WITH ANIMATIONS & BETTER UX
+// staff-dashboard.js - FIXED VERSION
 
 // ===============================
 // INITIALIZATION
@@ -13,11 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Verify this is a staff user (not institution)
+    // Verify this is a staff user
     const userType = localStorage.getItem('userType');
     
     if (userType === 'institution') {
-        console.log('Institution user detected, redirecting to institution dashboard...');
+        console.log('Institution user detected, redirecting...');
         window.location.href = 'dashboard.html';
         return;
     }
@@ -50,7 +50,7 @@ async function loadStaffDashboard() {
         console.log('📊 Staff Profile API Response:', profileResponse);
         
         if (!profileResponse.success) {
-            throw new Error(profileResponse.message || 'Failed to load profile data');
+            throw new Error(profileResponse.message || 'Failed to load profile');
         }
 
         const data = profileResponse.data;
@@ -59,7 +59,7 @@ async function loadStaffDashboard() {
             throw new Error('No data received from server');
         }
         
-        // Display profile with animations
+        // Display profile
         displayStaffProfile(data);
         
         // Fetch assignments
@@ -71,13 +71,13 @@ async function loadStaffDashboard() {
         
     } catch (error) {
         hideLoading();
-        console.error('❌ Error loading staff dashboard:', error);
-        showError(error.message || 'Failed to load dashboard data');
+        console.error('❌ Error loading dashboard:', error);
+        showError(error.message || 'Failed to load dashboard');
     }
 }
 
 // ===============================
-// DISPLAY STAFF PROFILE
+// DISPLAY STAFF PROFILE - FIXED
 // ===============================
 
 function displayStaffProfile(data) {
@@ -89,22 +89,29 @@ function displayStaffProfile(data) {
         nameDisplay.textContent = data.staff.name || 'Staff Member';
     }
     
-    // Update institution info
-    const instNameDisplay = document.getElementById('inst-name-display');
+    // ✅ FIX: Get institution code from credential
     const instCodeDisplay = document.getElementById('inst-code-display');
-    
-    const institutionCode = localStorage.getItem('institutionCode');
     if (instCodeDisplay) {
-        instCodeDisplay.textContent = institutionCode || 'N/A';
+        // Try to get from credential first, then localStorage
+        const institutionCode = data.credential?.institutionId || 
+                               localStorage.getItem('institutionCode') || 
+                               'N/A';
+        instCodeDisplay.textContent = institutionCode;
     }
+    
+    // Update institution name (placeholder for now)
+    const instNameDisplay = document.getElementById('inst-name-display');
     if (instNameDisplay) {
-        instNameDisplay.textContent = 'Institution'; // Could fetch from API if needed
+        instNameDisplay.textContent = 'Your Institution';
     }
     
     // Profile details - Staff info
     if (data.staff) {
         safeDisplay('staff-name', data.staff.name);
-        safeDisplay('staff-mobile', data.staff.mobile);
+        
+        // ✅ FIX: Use mobileNo instead of mobile
+        safeDisplay('staff-mobile', data.staff.mobileNo || data.staff.mobile);
+        
         safeDisplay('staff-designation', data.staff.designation?.name || 'Not Assigned');
     }
     
@@ -134,13 +141,13 @@ function displayStaffProfile(data) {
             statusElement.appendChild(badge);
         }
         
-        // Display permissions based on access level
+        // Display permissions
         displayPermissions(data.credential);
     }
 }
 
 // ===============================
-// LOAD STAFF ASSIGNMENTS
+// LOAD STAFF ASSIGNMENTS - FIXED
 // ===============================
 
 async function loadStaffAssignments() {
@@ -156,31 +163,61 @@ async function loadStaffAssignments() {
         
         const data = response.data;
         
-        // Display assigned classes
-        if (data.classMapping && data.classMapping.classes) {
-            displayAssignedClasses(data.classMapping.classes);
+        // ✅ FIX: Better null checking for assigned classes
+        if (data && data.classMapping) {
+            // Extract class names from assignedClasses array
+            let classNames = [];
+            
+            if (data.classMapping.assignedClasses && Array.isArray(data.classMapping.assignedClasses)) {
+                classNames = data.classMapping.assignedClasses.map(cls => {
+                    // Handle both string and object formats
+                    if (typeof cls === 'string') {
+                        return cls;
+                    } else if (cls && cls.className) {
+                        return cls.nickname || cls.className;
+                    }
+                    return null;
+                }).filter(name => name !== null);
+            }
+            
+            console.log('✅ Processed class names:', classNames);
+            displayAssignedClasses(classNames);
+        } else {
+            console.log('ℹ️ No class mapping data');
+            displayAssignedClasses([]);
         }
         
-        // Display teaching subjects
-        if (data.subjectMappings && data.subjectMappings.length > 0) {
+        // ✅ FIX: Better null checking for subject mappings
+        if (data && data.subjectMappings && Array.isArray(data.subjectMappings)) {
             displayTeachingSubjects(data.subjectMappings);
+        } else {
+            console.log('ℹ️ No subject mappings');
+            displayTeachingSubjects([]);
         }
         
     } catch (error) {
         console.error('❌ Error loading assignments:', error);
-        // Don't show error to user, just log it
+        // Don't show error to user, just display empty states
+        displayAssignedClasses([]);
+        displayTeachingSubjects([]);
     }
 }
 
 // ===============================
-// DISPLAY ASSIGNED CLASSES
+// DISPLAY ASSIGNED CLASSES - FIXED
 // ===============================
 
-function displayAssignedClasses(classes) {
+function displayAssignedClasses(classNames) {
     const container = document.getElementById('classes-list');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ Classes list container not found');
+        return;
+    }
     
-    if (!classes || classes.length === 0) {
+    console.log('📚 Displaying classes:', classNames);
+    
+    // Handle empty or invalid data
+    if (!classNames || !Array.isArray(classNames) || classNames.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <p>📭 No classes assigned yet</p>
@@ -192,10 +229,11 @@ function displayAssignedClasses(classes) {
     
     container.innerHTML = '';
     
-    classes.forEach((className, index) => {
+    classNames.forEach((className, index) => {
         const card = document.createElement('div');
         card.className = 'class-card';
         card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animation = 'fadeInUp 0.6s ease-out';
         
         card.innerHTML = `
             <h4>${sanitizeHTML(className)}</h4>
@@ -204,20 +242,29 @@ function displayAssignedClasses(classes) {
         
         container.appendChild(card);
     });
+    
+    console.log(`✅ Displayed ${classNames.length} classes`);
 }
 
 // ===============================
-// DISPLAY TEACHING SUBJECTS
+// DISPLAY TEACHING SUBJECTS - FIXED
 // ===============================
 
 function displayTeachingSubjects(subjectMappings) {
     const section = document.getElementById('subjects-section');
     const container = document.getElementById('subjects-list');
     
-    if (!section || !container) return;
+    if (!section || !container) {
+        console.error('❌ Subjects section not found');
+        return;
+    }
     
-    if (!subjectMappings || subjectMappings.length === 0) {
+    console.log('📖 Displaying subjects:', subjectMappings);
+    
+    // ✅ FIX: Better validation
+    if (!subjectMappings || !Array.isArray(subjectMappings) || subjectMappings.length === 0) {
         section.style.display = 'none';
+        console.log('ℹ️ No subjects to display');
         return;
     }
     
@@ -229,13 +276,27 @@ function displayTeachingSubjects(subjectMappings) {
     const subjectsByClass = {};
     
     subjectMappings.forEach(mapping => {
-        const className = mapping.class?.name || 'Unknown Class';
+        if (!mapping) return;
+        
+        const className = mapping.classId?.className || 
+                         mapping.class?.className || 
+                         mapping.class?.name || 
+                         'Unknown Class';
+        
         if (!subjectsByClass[className]) {
             subjectsByClass[className] = [];
         }
-        mapping.subjects.forEach(subject => {
-            if (subject.name && !subjectsByClass[className].includes(subject.name)) {
-                subjectsByClass[className].push(subject.name);
+        
+        // Handle subjects array
+        const subjects = mapping.subjectIds || mapping.subjects || [];
+        
+        subjects.forEach(subject => {
+            if (!subject) return;
+            
+            const subjectName = subject.subjectName || subject.name;
+            
+            if (subjectName && !subjectsByClass[className].includes(subjectName)) {
+                subjectsByClass[className].push(subjectName);
             }
         });
     });
@@ -247,6 +308,7 @@ function displayTeachingSubjects(subjectMappings) {
             const card = document.createElement('div');
             card.className = 'subject-card';
             card.style.animationDelay = `${index * 0.1}s`;
+            card.style.animation = 'fadeInUp 0.6s ease-out';
             
             card.innerHTML = `
                 <h4>${sanitizeHTML(subject)}</h4>
@@ -257,6 +319,8 @@ function displayTeachingSubjects(subjectMappings) {
             index++;
         });
     }
+    
+    console.log(`✅ Displayed subjects from ${Object.keys(subjectsByClass).length} classes`);
 }
 
 // ===============================
@@ -270,7 +334,7 @@ function displayPermissions(credential) {
     container.innerHTML = '';
     
     const accessLevel = credential.accessLevel;
-    const canAccessAllClasses = credential.canAccessAllClasses;
+    const canAccessAllClasses = credential.additionalAccess?.canAccessAllClasses || false;
     
     // Define permissions based on access level
     let permissions = [];
@@ -403,7 +467,7 @@ function showSuccess(message) {
 }
 
 // ===============================
-// SANITIZATION (from utils.js)
+// SANITIZATION
 // ===============================
 
 function sanitizeHTML(str) {

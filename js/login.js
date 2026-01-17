@@ -178,7 +178,7 @@ async function handleInstitutionLogin(e) {
 }
 
 // ===============================
-// STAFF LOGIN HANDLER
+// STAFF LOGIN HANDLER - UPDATED ✅
 // ===============================
 
 async function handleStaffLogin(e) {
@@ -221,6 +221,14 @@ async function handleStaffLogin(e) {
             localStorage.setItem('token', response.token);
             localStorage.setItem('userType', 'staff');
             localStorage.setItem('loginId', loginId);
+            
+            // ✅ SAVE INSTITUTION CODE - THIS IS CRITICAL!
+            if (response.institutionCode) {
+                localStorage.setItem('institutionCode', response.institutionCode);
+                console.log('✅ Institution code saved:', response.institutionCode);
+            } else {
+                console.warn('⚠️ No institution code in response');
+            }
             
             // Add slight delay for better UX
             setTimeout(() => {
