@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = 'https://institution-backend-kkw8.onrender.com';
+const API_BASE_URL = 'https://institution-backend-kkw8.onrender.com/api';
 
 // API Endpoints
 const API_ENDPOINTS = {
