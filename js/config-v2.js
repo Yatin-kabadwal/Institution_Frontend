@@ -1,5 +1,5 @@
 // VERSION: 2025-01-19-v2
-// API Configuration
+// API Configuration  
 const API_BASE_URL = 'https://institution-backend-kkw8.onrender.com/api';
 
 // API Endpoints
@@ -21,7 +21,7 @@ const API_ENDPOINTS = {
     // Institution
     INSTITUTION_PROFILE: '/institution/profile',
     
-    // ✅ STAFF ENDPOINTS (ADDED - THESE WERE MISSING!)
+    // Staff
     STAFF_PROFILE: '/staff/profile',
     STAFF_ASSIGNMENTS: '/staff/assignments',
     
