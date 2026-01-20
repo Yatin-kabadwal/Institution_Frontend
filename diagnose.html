@@ -112,7 +112,7 @@
             report += '<div class="test-item">';
             report += '<h3>Test 2: API Connection</h3>';
             try {
-                const response = await fetch('https://institution-backend.onrender.com/api/health');
+                const response = await fetch('https://institution-backend-kkw8.onrender.com/api/health');
                 const data = await response.json();
                 report += '<div class="result success">✅ Backend is online</div>';
                 report += '<div class="result info">📊 Status: ' + data.status + '</div>';
@@ -125,7 +125,7 @@
             report += '<div class="test-item">';
             report += '<h3>Test 3: Profile Data Fetch</h3>';
             try {
-                const response = await fetch('https://institution-backend.onrender.com/api/institution/profile', {
+                const response = await fetch('https://institution-backend-kkw8.onrender.com/api/institution/profile', {
                     headers: {
                         'Authorization': 'Bearer ' + token,
                         'Content-Type': 'application/json'
