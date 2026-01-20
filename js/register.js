@@ -1,6 +1,8 @@
-// Register.js - Registration Logic
+// Register.js - Registration Logic (FIXED FOR JSON)
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Register page initialized');
+    
     // Populate state dropdown
     const stateSelect = document.getElementById('state');
     populateDropdown(stateSelect, INDIAN_STATES);
@@ -9,23 +11,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const typeSelect = document.getElementById('type');
     const otherTypeContainer = document.getElementById('other-type-container');
     
-    typeSelect.addEventListener('change', function() {
-        if (this.value === 'Other') {
-            otherTypeContainer.style.display = 'block';
-            document.getElementById('other-type').required = true;
-        } else {
-            otherTypeContainer.style.display = 'none';
-            document.getElementById('other-type').required = false;
-        }
-    });
+    if (typeSelect && otherTypeContainer) {
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'Other') {
+                otherTypeContainer.style.display = 'block';
+                document.getElementById('other-type').required = true;
+            } else {
+                otherTypeContainer.style.display = 'none';
+                document.getElementById('other-type').required = false;
+            }
+        });
+    }
     
     // Handle form submission
     const form = document.getElementById('register-form');
-    form.addEventListener('submit', handleRegistration);
+    if (form) {
+        form.addEventListener('submit', handleRegistration);
+        console.log('✅ Registration form handler attached');
+    } else {
+        console.error('❌ Registration form not found');
+    }
 });
 
 async function handleRegistration(e) {
     e.preventDefault();
+    
+    console.log('📝 Starting registration process...');
     
     // Get form values
     const name = document.getElementById('name').value.trim();
@@ -37,21 +48,23 @@ async function handleRegistration(e) {
     const mobile1 = document.getElementById('mobile1').value.trim();
     const mobile2 = document.getElementById('mobile2').value.trim();
     const email = document.getElementById('email').value.trim();
-    const logoFile = document.getElementById('logo').files[0];
     
     // If "Other" type is selected, get the specified type
     if (type === 'Other') {
-        type = document.getElementById('other-type').value.trim();
+        const otherTypeInput = document.getElementById('other-type');
+        if (otherTypeInput) {
+            type = otherTypeInput.value.trim();
+        }
     }
     
     // Validate mobile numbers
     if (!validateMobile(mobile1)) {
-        showError('Mobile Number 1 must be 10 digits');
+        showError('Mobile Number 1 must be a valid 10-digit number');
         return;
     }
     
     if (mobile2 && !validateMobile(mobile2)) {
-        showError('Mobile Number 2 must be 10 digits');
+        showError('Mobile Number 2 must be a valid 10-digit number');
         return;
     }
     
@@ -62,57 +75,63 @@ async function handleRegistration(e) {
     }
     
     try {
-        showLoading('Registering institution...');
+        showLoading('Registering your institution...');
         
-        // Prepare FormData
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('type', type);
-        
-        // Address object
-        const address = {
-            state: state,
-            district: district,
-            city: city,
-            location: location
+        // ✅ FIXED: Send as JSON object, not FormData
+        const registrationData = {
+            name: name,
+            type: type,
+            address: {
+                state: state,
+                district: district,
+                city: city,
+                location: location
+            },
+            contacts: {
+                mobile1: mobile1,
+                mobile2: mobile2 || '',
+                email: email
+            }
         };
-        formData.append('address', JSON.stringify(address));
         
-        // Contacts object
-        const contacts = {
-            mobile1: mobile1,
-            mobile2: mobile2 || null,
-            email: email
-        };
-        formData.append('contacts', JSON.stringify(contacts));
+        console.log('📤 Sending registration data:', registrationData);
         
-        // Logo file (if uploaded)
-        if (logoFile) {
-            formData.append('logo', logoFile);
-        }
-        
-        // Make API call
-        const response = await apiPostFormData(API_ENDPOINTS.REGISTER, formData, false);
+        // ✅ FIXED: Use apiPost instead of apiPostFormData
+        const response = await apiPost(API_ENDPOINTS.REGISTER, registrationData, false);
         
         hideLoading();
         
+        console.log('✅ Registration response:', response);
+        
         if (response.success) {
-            showSuccess(response.message);
+            showSuccess(response.message || 'Registration successful!');
             
             // Store institution code for OTP verification
-            localStorage.setItem('pendingInstitutionCode', response.institutionCode);
+            if (response.institutionCode) {
+                localStorage.setItem('pendingInstitutionCode', response.institutionCode);
+                localStorage.setItem('pendingEmail', email);
+                console.log('✅ Stored institution code:', response.institutionCode);
+            }
             
-            // Show OTP (for development - remove in production)
-            alert('OTP: ' + response.otp + '\nInstitution Code: ' + response.institutionCode);
+            // Show OTP in console for development
+            if (response.otp) {
+                console.log('🔐 OTP:', response.otp);
+                console.log('🏢 Institution Code:', response.institutionCode);
+            }
             
             // Redirect to OTP verification page after 2 seconds
             setTimeout(() => {
                 window.location.href = 'verify-otp.html';
             }, 2000);
+        } else {
+            showError(response.message || 'Registration failed');
         }
         
     } catch (error) {
         hideLoading();
-        showError(error.message);
+        console.error('❌ Registration error:', error);
+        showError(error.message || 'Registration failed. Please try again.');
     }
 }
+
+console.log('✅ Register.js loaded successfully');
